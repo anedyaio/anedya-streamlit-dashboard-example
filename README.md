@@ -19,15 +19,12 @@ The Anedya IoT Dashboard enables users to monitor and control IoT devices remote
 - **Node ID:** Obtain the Node ID from the Anedya dashboard by navigating to the project section and selecting the node.
 - **API Key:** Obtain the API key from the Anedya dashboard by navigating to the  project -> APIKEY.
 
-## Documentation
-
-For detailed documentation, refer to the official documentation [here](https://docs.anedya.io/).
-
 ## License
 
 This project is licensed under the [MIT License](https://github.com/anedyaio/anedya-example-nodemcu/blob/main/LICENSE).
 
-
+>[!TIP]
+>For detailed documentation, refer to the official documentation [here](https://docs.anedya.io/?utm_source=github&utm_medium=link&utm_campaign=github-examples&utm_content=streamlit-dashboard).
 >[!TIP]
 > For more information, visit [anedya.io](https://anedya.io/?utm_source=github&utm_medium=link&utm_campaign=github-examples&utm_content=streamlit-dashboard)
  
