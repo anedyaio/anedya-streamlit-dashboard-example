@@ -3,11 +3,13 @@
 # anedya-streamlit-dashboard-example
 An example dashboard developed in streamlit
 
-
 <p align="center">
     <img src="https://cdn.anedya.io/anedya_black_banner.png" alt="Logo">
 </p>
-The Anedya IoT Dashboard enables users to monitor and control IoT devices remotely. The dashboard displays real-time data on humidity and temperature, as well as providing control buttons to operate a fan and a light. The control buttons sync with real-time changes, reflecting the current state of the devices.
+The Anedya IoT cloud enables users to monitor and control IoT devices remotely. The dashboard displays real-time data on humidity and temperature, as well as providing control buttons to operate a fan and a light. The control buttons sync with real-time changes, reflecting the current state of the devices. 
+
+
+![Demo Dashboard](./docs/anedya_dashboard.png)
 
 ## Features
 - **User Authentication:** Basic login functionality.
@@ -17,7 +19,7 @@ The Anedya IoT Dashboard enables users to monitor and control IoT devices remote
 
 ## Setup and Configuration
 - **Node ID:** Obtain the Node ID from the Anedya dashboard by navigating to the project section and selecting the node.
-- **API Key:** Obtain the API key from the Anedya dashboard by navigating to the  project -> APIKEY.
+- **API Key:** Obtain the API key from the Anedya dashboard by navigating to the project -> APIKEY.
 
 ## License
 
