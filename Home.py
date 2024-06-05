@@ -1,19 +1,17 @@
-nodeID='NODE-ID'   #get it from anedya dashboard -> project -> node 
+nodeId='NODE-ID'   #get it from anedya dashboard -> project -> node 
 apiKey = "YOUR-API-KEY"  # aneyda project apikey
 
 import streamlit as st
-import time
 import pandas as pd
 import altair as alt
-import pytz  # Add this import for time zone conversion
-import json
-import requests
 from streamlit_autorefresh import st_autorefresh
 
 from utils.anedya import anedya_config
 from utils.anedya import anedya_sendCommand 
 from utils.anedya import anedya_getValue
 from utils.anedya import anedya_setValue
+from utils.anedya import fetchHumidityData
+from utils.anedya import fetchTemperatureData
 
 
 st.set_page_config(page_title="Anedya IoT Dashboard", layout="wide")
@@ -30,7 +28,7 @@ temperatureData=pd.DataFrame()
 
 def main():
 
-    anedya_config(nodeID,apiKey)
+    anedya_config(nodeId,apiKey)
     global humidityData, temperatureData
 
     # Initialize the log in state if does not exist
@@ -211,153 +209,6 @@ def operateLight():
         st.session_state.LightState = False
         st.toast("Light turned off!")
 
-# @st.cache_data(ttl=30, show_spinner=False)
-def fetchHumidityData() -> pd.DataFrame:
-
-    url = "https://api.anedya.io/v1/aggregates/variable/byTime"
-    apiKey_in_formate = "Bearer " + apiKey
-    
-    currentTime = int(time.time())
-    pastHour_Time = int(currentTime - 86400)
-
-    payload = json.dumps(
-        {
-        "variable": "humidity",
-        "from": pastHour_Time,
-        "to": currentTime,
-        "config": {
-                "aggregation": {
-                "compute": "avg",
-                "forEachNode": True
-                },
-                "interval": {
-                "measure": "minute",
-                "interval": 5
-                },
-                "responseOptions": {
-                "timezone": "UTC"
-                },
-                "filter": {
-                "nodes": [
-                    nodeID
-                ],
-                "type": "include"
-                }
-            }
-        }
-    )
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": apiKey_in_formate
-    }
-
-    response = requests.request("POST", url, headers=headers, data=payload)
-    response_message = response.text
-
-    if response.status_code==200:    
-        data_list = []
-
-        # Parse JSON string
-        response_data = json.loads(response_message).get("data")
-        for timeStamp, value in reversed(response_data.items()):
-            for entry in reversed(value):
-                data_list.append(entry)
-        
-        if data_list:
-
-            st.session_state.CurrentHumidity=round(data_list[0]["aggregate"],2)
-            df = pd.DataFrame(data_list)
-            # Convert timestamp to datetime and set it as the index
-            df["Datetime"] = pd.to_datetime(df["timestamp"], unit="s")
-            local_tz = pytz.timezone("Asia/Kolkata")  # Change to your local time zone
-            df["Datetime"] = df["Datetime"].dt.tz_localize("UTC").dt.tz_convert(local_tz)
-            df.set_index("Datetime", inplace=True)
-            # Drop the original 'timestamp' column as it's no longer needed
-            df.drop(columns=["timestamp"], inplace=True)
-            # print(df.head(70))
-            # Reset the index to prepare for Altair chart
-            chart_data = df.reset_index()
-
-        return chart_data
-    else:
-        st.write(response_message)
-        value=pd.DataFrame()
-        return value
-
-
-# @st.cache_data(ttl=30, show_spinner=False)
-def fetchTemperatureData() -> pd.DataFrame:
-    url = "https://api.anedya.io/v1/aggregates/variable/byTime"
-    apiKey_in_formate = "Bearer " + apiKey
-    
-    currentTime = int(time.time())
-    pastHour_Time = int(currentTime - 86400)
-
-    payload = json.dumps(
-        {
-        "variable": "temperature",
-        "from": pastHour_Time,
-        "to": currentTime,
-        "config": {
-                "aggregation": {
-                "compute": "avg",
-                "forEachNode": True
-                },
-                "interval": {
-                "measure": "minute",
-                "interval": 5
-                },
-                "responseOptions": {
-                "timezone": "UTC"
-                },
-                "filter": {
-                "nodes": [
-                    nodeID
-                ],
-                "type": "include"
-                }
-            }
-        }
-    )
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": apiKey_in_formate
-    }
-
-    response = requests.request("POST", url, headers=headers, data=payload)
-    response_message = response.text
-
-    if response.status_code==200:    
-        data_list = []
-
-        # Parse JSON string
-        response_data = json.loads(response_message).get("data")
-        for timeStamp, value in reversed(response_data.items()):
-            for entry in reversed(value):
-                data_list.append(entry)
-
-        if data_list:
-            st.session_state.CurrentTemperature=round(data_list[0]["aggregate"],2)
-            df = pd.DataFrame(data_list)
-            df["Datetime"] = pd.to_datetime(df["timestamp"], unit="s")
-            local_tz = pytz.timezone("Asia/Kolkata")  # Change to your local time zone
-            df["Datetime"] = df["Datetime"].dt.tz_localize("UTC").dt.tz_convert(local_tz)
-            df.set_index("Datetime", inplace=True)
-
-            # Droped the original 'timestamp' column as it's no longer needed
-            df.drop(columns=["timestamp"], inplace=True)
-            # print(df.head())
-            # Reset the index to prepare for Altair chart
-            chart_data = df.reset_index()
-        
-        return chart_data
-    else:
-        st.write(response_message)
-        Value=pd.DataFrame()
-        return Value
-
 
 # @st.cache_data(ttl=10, show_spinner=False)
 def GetFanStatus() -> list:
@@ -374,9 +225,7 @@ def GetFanStatus() -> list:
 
 # @st.cache_data(ttl=10, show_spinner=False)
 def GetLightStatus() -> list:
-    # Fetch the Fan Value store
     value = anedya_getValue("Bulb")
-    # Return [bool, int] = [false, -1] means error
     if value[1]==1:
         on=value[0]
         if on:
