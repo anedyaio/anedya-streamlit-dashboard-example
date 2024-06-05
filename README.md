@@ -25,6 +25,7 @@ This project is licensed under the [MIT License](https://github.com/anedyaio/ane
 
 >[!TIP]
 >For detailed documentation, refer to the official documentation [here](https://docs.anedya.io/?utm_source=github&utm_medium=link&utm_campaign=github-examples&utm_content=streamlit-dashboard).
+
 >[!TIP]
 > For more information, visit [anedya.io](https://anedya.io/?utm_source=github&utm_medium=link&utm_campaign=github-examples&utm_content=streamlit-dashboard)
  
