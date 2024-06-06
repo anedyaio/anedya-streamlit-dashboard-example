@@ -21,6 +21,35 @@ The Anedya IoT cloud enables users to monitor and control IoT devices remotely. 
 - **Node ID:** Obtain the Node ID from the Anedya dashboard by navigating to the project section and selecting the node.
 - **API Key:** Obtain the API key from the Anedya dashboard by navigating to the project -> APIKEY.
 
+## Usage
+
+### Running Locally
+1. Clone the Repository:
+Clone aneday-streamlit-dashboard-example repo from anedya github repo
+2. Install Dependencies:
+Install required dependencies.
+3. Run the Streamlit App:
+Start the Streamlit server:
+```
+streamlit run app.py
+
+```
+This will launch the dashboard in your default web browser.
+
+### Hosting on Streamlit Cloud
+
+1. Fork the Repository:
+Fork this repository to your own GitHub account.
+2. Sign Up / Log In to Streamlit Cloud:
+Go to [Streamlit Cloud](https://streamlit.io/cloud) and sign in with your GitHub account.
+3. Create a New App:
+- Click on "New app".
+- Select your forked repository.
+- Set the branch to main (or the branch you want to deploy from).
+- Set the main file path to Home.py.
+4. Deploy:
+Click "Deploy" to launch your app on Streamlit Cloud.
+
 ## License
 
 This project is licensed under the [MIT License](https://github.com/anedyaio/anedya-example-nodemcu/blob/main/LICENSE).
