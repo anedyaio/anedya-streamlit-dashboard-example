@@ -25,7 +25,12 @@ The Anedya IoT cloud enables users to monitor and control IoT devices remotely. 
 
 ### Running Locally
 1. Clone the Repository:
-Clone aneday-streamlit-dashboard-example repo from anedya github repo
+Clone aneday-streamlit-dashboard-example repo from anedya github.
+```
+git clone https://github.com/anedyaio/anedya-streamlit-dashboard-example.git
+cd anedya-streamlit-dashboard-example
+
+```
 2. Install Dependencies:
 Install required dependencies.
 3. Run the Streamlit App:
