@@ -72,7 +72,7 @@ def main():
 def drawLogin():
     cols = st.columns([1, 0.8, 1], gap='small')
     with cols[0]:
-        print()
+        pass
     with cols[1]:
         st.title("Anedya Demo Dashboard", anchor=False)
         username_inp = st.text_input("Username")
