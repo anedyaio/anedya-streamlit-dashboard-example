@@ -32,11 +32,19 @@ cd anedya-streamlit-dashboard-example
 
 ```
 2. Install Dependencies:
-Install required dependencies.
+To ensure the application has all the necessary libraries, you'll need to install the dependencies listed in the requirements.txt file. This file contains a list of all the packages along with their versions that the app depends on.
+Here's how to install these dependencies:
+- Open a terminal or command prompt.
+- Navigate to the directory where you cloned the repository.
+- Run the following command to install the dependencies using pip:
+```
+pip install -r requirements.txt
+This command reads the `requirements.txt` file and installs all the listed packages.
+```
 3. Run the Streamlit App:
 Start the Streamlit server:
 ```
-streamlit run app.py
+streamlit run Home.py
 
 ```
 This will launch the dashboard in your default web browser.
