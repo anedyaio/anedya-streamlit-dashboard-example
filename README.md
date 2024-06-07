@@ -41,6 +41,7 @@ Here's how to install these dependencies:
 pip install -r requirements.txt
 ```
 This command reads the `requirements.txt` file and installs all the listed packages.
+
 3. Run the Streamlit App:
 Start the Streamlit server:
 ```
