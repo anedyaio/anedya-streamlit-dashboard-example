@@ -1,1 +1,6 @@
-streamlit-autorefresh==1.0.1
+streamlit
+pandas
+altair
+pytz
+requests
+streamlit-autorefresh
