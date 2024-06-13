@@ -1,3 +1,6 @@
+# The Anedya IoT cloud enables users to monitor and control IoT devices remotely. The dashboard displays real-time data on humidity and temperature, as well as providing control buttons to operate a fan and a light. 
+# The control buttons sync with real-time changes, reflecting the current state of the devices.
+
 import streamlit as st
 import pandas as pd
 import altair as alt
