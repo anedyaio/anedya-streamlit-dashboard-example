@@ -1,12 +1,13 @@
 import json
-import requests
 import time
+import requests
 import streamlit as st
 import pandas as pd
 import pytz  # Add this import for time zone conversion
 
 nodeId = ""
 apiKey = ""
+
 
 
 def anedya_config(NODE_ID, API_KEY):
@@ -97,7 +98,7 @@ def anedya_getValue(KEY):
     return value
 
 
-# @st.cache_data(ttl=30, show_spinner=False)
+@st.cache_data(ttl=30, show_spinner=False)
 def fetchHumidityData() -> pd.DataFrame:
     url = "https://api.anedya.io/v1/aggregates/variable/byTime"
     apiKey_in_formate = "Bearer " + apiKey
@@ -163,6 +164,8 @@ def fetchHumidityData() -> pd.DataFrame:
             # print(df.head(70))
             # Reset the index to prepare for Altair chart
             chart_data = df.reset_index()
+        else:
+            chart_data = pd.DataFrame()
 
         return chart_data
     else:
@@ -171,7 +174,7 @@ def fetchHumidityData() -> pd.DataFrame:
         return value
 
 
-# @st.cache_data(ttl=30, show_spinner=False)
+@st.cache_data(ttl=30, show_spinner=False)
 def fetchTemperatureData() -> pd.DataFrame:
     url = "https://api.anedya.io/v1/aggregates/variable/byTime"
     apiKey_in_formate = "Bearer " + apiKey
@@ -236,9 +239,11 @@ def fetchTemperatureData() -> pd.DataFrame:
             # print(df.head())
             # Reset the index to prepare for Altair chart
             chart_data = df.reset_index()
+        else:
+            chart_data = pd.DataFrame()
 
         return chart_data
     else:
         st.write(response_message)
-        Value = pd.DataFrame()
-        return Value
+        value = pd.DataFrame()
+        return value

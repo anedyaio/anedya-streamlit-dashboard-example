@@ -21,6 +21,9 @@ The Anedya IoT cloud enables users to monitor and control IoT devices remotely. 
 - **Node ID:** Obtain the Node ID from the Anedya dashboard by navigating to the project section and selecting the node.
 - **API Key:** Obtain the API key from the Anedya dashboard by navigating to the project -> APIKEY.
 
+## Integration with hardware
+Connect your Nodemcu with a DHT sensor and a relay module as per the [basic-home-automation](https://github.com/anedyaio/anedya-example-nodemcu/tree/development/more/basic-home-automation) example. Upload the provided sketch from the repo to read sensor data and control devices.Follow the detailed instructions in the README.
+
 ## Usage
 
 ### Running Locally
@@ -63,6 +66,8 @@ Go to [Streamlit Cloud](https://streamlit.io/cloud) and sign in with your GitHub
 - Set the main file path to Home.py.
 4. Deploy:
 Click "Deploy" to launch your app on Streamlit Cloud.
+
+
 
 ## License
 
