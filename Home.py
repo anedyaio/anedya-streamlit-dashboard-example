@@ -10,14 +10,14 @@ from utils.anedya import anedya_config
 from utils.anedya import anedya_sendCommand
 from utils.anedya import anedya_getValue
 from utils.anedya import anedya_setValue
-from utils.anedya import fetchHumidityData
-from utils.anedya import fetchTemperatureData
+from utils.anedya import fetch_room_temp
+from utils.anedya import fetch_coil_temp
 
 # nodeId = "20deeee8-f8ae-11ee-9dd8-c3aa61afe2fb"  # get it from anedya dashboard -> project -> node 
-nodeId = "YOUR-NODE-ID"  # get it from anedya dashboard -> project -> node 
-apiKey = "YOUR-CONNECTION-KEY"  # aneyda project apikey
+nodeId = "e8e528ac-3545-11ef-9ecc-a1461caa74a3"  # get it from anedya dashboard -> project -> node 
+apiKey = "ae0651239c4beffc68e3ccf1829b55e98068f57af598e2af9151aaa53f5e5898"  # aneyda project apikey
 
-st.set_page_config(page_title="Anedya IoT Dashboard", layout="wide")
+st.set_page_config(page_title="Project: Glacier", layout="wide")
 
 #uncomment to show count
 # count = st_autorefresh(interval=30000, limit=None, key="auto-refresh-handler")
@@ -29,45 +29,32 @@ def V_SPACE(lines):
         st.write("&nbsp;")
 
 
-humidityData = pd.DataFrame()
-temperatureData = pd.DataFrame()
+room_temp = pd.DataFrame()
+coil_temp = pd.DataFrame()
 
 
 def main():
-    global humidityData, temperatureData
+    global room_temp, coil_temp
     anedya_config(NODE_ID=nodeId, API_KEY=apiKey)
 
     # Initialize the log in state if does not exist
     if "LoggedIn" not in st.session_state:
         st.session_state.LoggedIn = False
 
-    if "FanButtonText" not in st.session_state:
-        st.session_state.FanButtonText = "Turn Fan On!"
+    if "current_room_temp" not in st.session_state:
+        st.session_state.current_room_temp = 0
 
-    if "LightButtonText" not in st.session_state:
-        st.session_state.LightButtonText = "Turn Light On!"
+    if "current_coil_temp" not in st.session_state:
+        st.session_state.current_coil_temp = 0
 
-    if "LightState" not in st.session_state:
-        st.session_state.LightState = False
-
-    if "FanState" not in st.session_state:
-        st.session_state.FanState = False
-
-    if "CurrentHumidity" not in st.session_state:
-        st.session_state.CurrentHumidity = 0
-
-    if "CurrentTemperature" not in st.session_state:
-        st.session_state.CurrentTemperature = 0
+    if "set_room_temp" not in st.session_state:
+        st.session_state.set_room_temp = "0"
 
     if st.session_state.LoggedIn is False:
         drawLogin()
     else:
-        humidityData = fetchHumidityData()
-        temperatureData = fetchTemperatureData()
-
-        GetFanStatus()
-        GetLightStatus()
-
+        room_temp = fetch_room_temp()
+        coil_temp = fetch_coil_temp()
         drawDashboard()
 
 
@@ -76,7 +63,7 @@ def drawLogin():
     with cols[0]:
         pass
     with cols[1]:
-        st.title("Anedya Demo Dashboard", anchor=False)
+        st.title("Project: Glacier", anchor=False)
         username_inp = st.text_input("Username")
         password_inp = st.text_input("Password", type="password")
         submit_button = st.button(label="Submit")
@@ -94,9 +81,9 @@ def drawLogin():
 def drawDashboard():
     headercols = st.columns([1, 0.1, 0.1], gap="small")
     with headercols[0]:
-        st.title("Anedya Demo Dashboard", anchor=False)
+        st.title("Project: Glacier", anchor=False)
     with headercols[1]:
-         st.button("Refresh")
+        st.button("Refresh")
 
     with headercols[2]:
         logout = st.button("Logout")
@@ -105,32 +92,48 @@ def drawDashboard():
         st.session_state.LoggedIn = False
         st.rerun()
 
-    st.markdown("This dashboard provides live view of the Anedya's Office. Also allowing you to control the Light and Fan remotely!")
+    # st.markdown("Dashboard to control the Meter")
 
     st.subheader(body="Current Status", anchor=False)
     cols = st.columns(2, gap="medium")
     with cols[0]:
-        st.metric(label="Humidity", value=str(st.session_state.CurrentHumidity) + " %")
+        st.metric(label="Room Temperature", value=str(st.session_state.current_room_temp) + " %")
     with cols[1]:
-        st.metric(label="Temperature", value=str(st.session_state.CurrentTemperature) + "  °C")
+        st.metric(label="Coil Temperature", value=str(st.session_state.current_coil_temp) + "  °C")
     # with cols[2]:
     #    st.metric(label="Refresh Count", value=count)
-
-    buttons = st.columns(2, gap="small")
+    st.subheader(body="Set Parameters", anchor=False)
+    buttons = st.columns([0.3,0.3,1], gap="small")
     with buttons[0]:
-        st.text("Control Fan:")
-        st.button(label=st.session_state.FanButtonText, on_click=operateFan)
+        # st.text("Room temp set pint:")
+        room_temp_input=st.text_input("Room Temperature",placeholder=st.session_state.set_room_temp)
+        # make thrre columns
+        cols2 = st.columns([0.3,0.3,0.4], gap="small")
+        with cols2[0]:
+            pass
+        with cols2[1]:
+            pass
+        with cols2[2]:
+            submit_button = st.button(label=" Set Data ")
+            if submit_button:
+                if room_temp_input !="":
+                    st.session_state.set_room_temp = str(room_temp_input)
+                    anedya_sendCommand("set_room_temp", room_temp_input)
+                    room_temp_input=""
+                    st.rerun()
+
     with buttons[1]:
-        st.text("Control Light:")
-        st.button(label=st.session_state.LightButtonText, on_click=operateLight)
+        pass
+    with buttons[2]:
+        pass
 
     charts = st.columns(2, gap="small")
     with charts[0]:
-        st.subheader(body="Humidity ", anchor=False)
-        if humidityData.empty:
+        st.subheader(body="Room Temperature", anchor=False)
+        if room_temp.empty:
             st.write("No Data !!")
         else:
-            humidity_chart_an = alt.Chart(data=humidityData).mark_area(
+            room_temp_chart_an = alt.Chart(data=room_temp).mark_area(
                 line={'color': '#1fa2ff'},
                 color=alt.Gradient(
                     gradient='linear',
@@ -150,22 +153,22 @@ def drawDashboard():
                 ),  # T indicates temporal (time-based) data
                 y=alt.Y(
                     "aggregate:Q",
-                    scale=alt.Scale(domain=[20, 65]),
-                    axis=alt.Axis(title="Humidity (%)", grid=True, tickCount=10),
+                    scale=alt.Scale(domain=[0, 45]),
+                    axis=alt.Axis(title="temeperature (°C)", grid=True, tickCount=10),
                 ),  # Q indicates quantitative data
                 tooltip=[alt.Tooltip('Datetime:T', format="%Y-%m-%d %H:%M:%S", title="Time",),
                         alt.Tooltip('aggregate:Q', format="0.2f", title="Value")],
             ).properties(height=400).interactive()
 
             # Display the Altair chart using Streamlit
-            st.altair_chart(humidity_chart_an, use_container_width=True)
+            st.altair_chart(room_temp_chart_an, use_container_width=True)
 
     with charts[1]:
-        st.subheader(body="Temperature", anchor=False)
-        if temperatureData.empty:
+        st.subheader(body="Coil Temperature", anchor=False)
+        if coil_temp.empty:
             st.write("No Data !!")
         else:
-            temperature_chart_an = alt.Chart(data=temperatureData).mark_area(
+            coil_temp_chart_an = alt.Chart(data=coil_temp).mark_area(
                 line={'color': '#1fa2ff'},
                 color=alt.Gradient(
                     gradient='linear',
@@ -186,71 +189,19 @@ def drawDashboard():
                 y=alt.Y(
                     "aggregate:Q",
                     # scale=alt.Scale(domain=[0, 100]),
-                    scale=alt.Scale(zero=False, domain=[10, 50]),
+                    scale=alt.Scale(zero=False, domain=[0, 100]),
                     axis=alt.Axis(title="Temperature (°C)", grid=True, tickCount=10),
                 ),  # Q indicates quantitative data
                 tooltip=[alt.Tooltip('Datetime:T', format="%Y-%m-%d %H:%M:%S", title="Time",),
                         alt.Tooltip('aggregate:Q', format="0.2f", title="Value")],
             ).properties(height=400).interactive()
 
-            st.altair_chart(temperature_chart_an, use_container_width=True)
+            st.altair_chart(coil_temp_chart_an, use_container_width=True)
 
 
-def operateFan():
-    if st.session_state.FanState is False:
-        anedya_sendCommand("Fan", "ON")
-        anedya_setValue("Fan", True)
-        st.session_state.FanButtonText = "Turn Fan Off!"
-        st.session_state.FanState = True
-        st.toast("Fan turned on!")
-    else:
-        st.session_state.FanButtonText = "Turn Fan On!"
-        st.session_state.FanState = False
-        anedya_sendCommand("Fan", "OFF")
-        anedya_setValue("Fan", False)
-        st.toast("Fan turned off!")
 
 
-def operateLight():
-    if st.session_state.LightState is False:
-        anedya_sendCommand("Light", "ON")
-        anedya_setValue("Light", True)
-        st.session_state.LightButtonText = "Turn Light Off!"
-        st.session_state.LightState = True
-        st.toast("Light turned on!")
-    else:
-        anedya_sendCommand("Light", "OFF")
-        anedya_setValue("Light", False)
-        st.session_state.LightButtonText = "Turn Light On!"
-        st.session_state.LightState = False
-        st.toast("Light turned off!")
 
-@st.cache_data(ttl=15, show_spinner=False)
-def GetFanStatus() -> list:
-    value = anedya_getValue("Fan")
-    if value[1] == 1:
-        on = value[0]
-        if on:
-            st.session_state.FanState = True
-            st.session_state.FanButtonText = "Turn Fan Off!"
-        else:
-            st.session_state.FanState = False
-            st.session_state.FanButtonText = "Turn Fan On!"
-    return value
-
-
-@st.cache_data(ttl=15, show_spinner=False)
-def GetLightStatus() -> list:
-    value = anedya_getValue("Light")
-    if value[1] == 1:
-        on = value[0]
-        if on:
-            st.session_state.LightState = True
-            st.session_state.LightButtonText = "Turn Light Off!"
-        else:
-            st.session_state.LightState = False
-            st.session_state.LightButtonText = "Turn Light On!"
-    return value
 
 
 if __name__ == "__main__":

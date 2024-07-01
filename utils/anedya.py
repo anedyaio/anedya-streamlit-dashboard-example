@@ -99,7 +99,7 @@ def anedya_getValue(KEY):
 
 
 @st.cache_data(ttl=30, show_spinner=False)
-def fetchHumidityData() -> pd.DataFrame:
+def fetch_room_temp() -> pd.DataFrame:
     url = "https://api.anedya.io/v1/aggregates/variable/byTime"
     apiKey_in_formate = "Bearer " + apiKey
 
@@ -108,7 +108,7 @@ def fetchHumidityData() -> pd.DataFrame:
 
     payload = json.dumps(
         {
-            "variable": "humidity",
+            "variable": "room-temperature-pv",
             "from": pastHour_Time,
             "to": currentTime,
             "config": {
@@ -152,7 +152,7 @@ def fetchHumidityData() -> pd.DataFrame:
 
         if data_list:
 
-            st.session_state.CurrentHumidity = round((data_list[0]["aggregate"]), 2)
+            st.session_state.current_room_temp = round((data_list[0]["aggregate"]), 2)
             df = pd.DataFrame(data_list)
             # Convert timestamp to datetime and set it as the index
             df["Datetime"] = pd.to_datetime(df["timestamp"], unit="s")
@@ -174,7 +174,7 @@ def fetchHumidityData() -> pd.DataFrame:
         return value
 
 @st.cache_data(ttl=30, show_spinner=False)
-def fetchTemperatureData() -> pd.DataFrame:
+def fetch_coil_temp() -> pd.DataFrame:
     url = "https://api.anedya.io/v1/aggregates/variable/byTime"
     apiKey_in_formate = "Bearer " + apiKey
 
@@ -183,7 +183,7 @@ def fetchTemperatureData() -> pd.DataFrame:
 
     payload = json.dumps(
         {
-            "variable": "temperature",
+            "variable": "coil-temperature-pv",
             "from": pastHour_Time,
             "to": currentTime,
             "config": {
@@ -226,7 +226,7 @@ def fetchTemperatureData() -> pd.DataFrame:
                 data_list.append(entry)
 
         if data_list:
-            st.session_state.CurrentTemperature = round(data_list[0]["aggregate"], 2)
+            st.session_state.current_coil_temp = round(data_list[0]["aggregate"], 2)
             df = pd.DataFrame(data_list)
             df["Datetime"] = pd.to_datetime(df["timestamp"], unit="s")
             local_tz = pytz.timezone("Asia/Kolkata")  # Change to your local time zone
