@@ -1,7 +1,7 @@
-import streamlit as st
 import json
-import time
 import requests
+import time
+import streamlit as st
 import pandas as pd
 import pytz  # Add this import for time zone conversion
 
@@ -9,14 +9,13 @@ nodeId = ""
 apiKey = ""
 
 
-def anedya_config(NODE_ID:str, API_KEY:str) -> None :
+def anedya_config(NODE_ID, API_KEY):
     global nodeId, apiKey
     nodeId = NODE_ID
     apiKey = API_KEY
-    return None
 
 
-def anedya_sendCommand(COMMAND_NAME:str, COMMAND_DATA:str):
+def anedya_sendCommand(COMMAND_NAME, COMMAND_DATA):
 
     url = "https://api.anedya.io/v1/commands/send"
     apiKey_in_formate = "Bearer " + apiKey
@@ -98,8 +97,8 @@ def anedya_getValue(KEY):
     return value
 
 
-@st.cache_data(ttl=30, show_spinner=False)
-def fetch_room_temp() -> pd.DataFrame:
+# @st.cache_data(ttl=30, show_spinner=False)
+def fetchHumidityData() -> pd.DataFrame:
     url = "https://api.anedya.io/v1/aggregates/variable/byTime"
     apiKey_in_formate = "Bearer " + apiKey
 
@@ -108,7 +107,7 @@ def fetch_room_temp() -> pd.DataFrame:
 
     payload = json.dumps(
         {
-            "variable": "room-temperature-pv",
+            "variable": "humidity",
             "from": pastHour_Time,
             "to": currentTime,
             "config": {
@@ -152,7 +151,7 @@ def fetch_room_temp() -> pd.DataFrame:
 
         if data_list:
 
-            st.session_state.current_room_temp = round((data_list[0]["aggregate"]), 2)
+            st.session_state.CurrentHumidity = round(data_list[0]["aggregate"], 2)
             df = pd.DataFrame(data_list)
             # Convert timestamp to datetime and set it as the index
             df["Datetime"] = pd.to_datetime(df["timestamp"], unit="s")
@@ -164,8 +163,6 @@ def fetch_room_temp() -> pd.DataFrame:
             # print(df.head(70))
             # Reset the index to prepare for Altair chart
             chart_data = df.reset_index()
-        else:
-            chart_data = pd.DataFrame()
 
         return chart_data
     else:
@@ -173,8 +170,9 @@ def fetch_room_temp() -> pd.DataFrame:
         value = pd.DataFrame()
         return value
 
-@st.cache_data(ttl=30, show_spinner=False)
-def fetch_coil_temp() -> pd.DataFrame:
+
+# @st.cache_data(ttl=30, show_spinner=False)
+def fetchTemperatureData() -> pd.DataFrame:
     url = "https://api.anedya.io/v1/aggregates/variable/byTime"
     apiKey_in_formate = "Bearer " + apiKey
 
@@ -183,7 +181,7 @@ def fetch_coil_temp() -> pd.DataFrame:
 
     payload = json.dumps(
         {
-            "variable": "coil-temperature-pv",
+            "variable": "temperature",
             "from": pastHour_Time,
             "to": currentTime,
             "config": {
@@ -226,7 +224,7 @@ def fetch_coil_temp() -> pd.DataFrame:
                 data_list.append(entry)
 
         if data_list:
-            st.session_state.current_coil_temp = round(data_list[0]["aggregate"], 2)
+            st.session_state.CurrentTemperature = round(data_list[0]["aggregate"], 2)
             df = pd.DataFrame(data_list)
             df["Datetime"] = pd.to_datetime(df["timestamp"], unit="s")
             local_tz = pytz.timezone("Asia/Kolkata")  # Change to your local time zone
@@ -238,11 +236,9 @@ def fetch_coil_temp() -> pd.DataFrame:
             # print(df.head())
             # Reset the index to prepare for Altair chart
             chart_data = df.reset_index()
-        else:
-            chart_data = pd.DataFrame()
 
         return chart_data
     else:
         st.write(response_message)
-        value = pd.DataFrame()
-        return value
+        Value = pd.DataFrame()
+        return Value
