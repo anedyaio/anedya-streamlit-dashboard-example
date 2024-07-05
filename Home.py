@@ -210,14 +210,14 @@ def operateFan():
 
 def operateLight():
     if st.session_state.LightState is False:
-        anedya_sendCommand("Bulb", "ON")
-        anedya_setValue("Bulb", True)
+        anedya_sendCommand("Light", "ON")
+        anedya_setValue("Light", True)
         st.session_state.LightButtonText = "Turn Light Off!"
         st.session_state.LightState = True
         st.toast("Light turned on!")
     else:
-        anedya_sendCommand("Bulb", "OFF")
-        anedya_setValue("Bulb", False)
+        anedya_sendCommand("Light", "OFF")
+        anedya_setValue("Light", False)
         st.session_state.LightButtonText = "Turn Light On!"
         st.session_state.LightState = False
         st.toast("Light turned off!")
@@ -239,7 +239,7 @@ def GetFanStatus() -> list:
 
 @st.cache_data(ttl=4, show_spinner=False)
 def GetLightStatus() -> list:
-    value = anedya_getValue("Bulb")
+    value = anedya_getValue("Light")
     if value[1] == 1:
         on = value[0]
         if on:
