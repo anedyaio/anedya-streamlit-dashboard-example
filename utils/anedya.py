@@ -97,7 +97,7 @@ def anedya_getValue(KEY):
     return value
 
 
-# @st.cache_data(ttl=30, show_spinner=False)
+@st.cache_data(ttl=30, show_spinner=False)
 def fetchHumidityData() -> pd.DataFrame:
     url = "https://api.anedya.io/v1/aggregates/variable/byTime"
     apiKey_in_formate = "Bearer " + apiKey
@@ -172,7 +172,7 @@ def fetchHumidityData() -> pd.DataFrame:
         return value
 
 
-# @st.cache_data(ttl=30, show_spinner=False)
+@st.cache_data(ttl=30, show_spinner=False)
 def fetchTemperatureData() -> pd.DataFrame:
     url = "https://api.anedya.io/v1/aggregates/variable/byTime"
     apiKey_in_formate = "Bearer " + apiKey

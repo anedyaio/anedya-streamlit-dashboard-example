@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-# from streamlit_autorefresh import st_autorefresh
+from streamlit_autorefresh import st_autorefresh
 
 from utils.anedya import anedya_config
 from utils.anedya import anedya_sendCommand
@@ -16,7 +16,7 @@ apiKey = "YOUR-API-KEY"  # aneyda project apikey
 st.set_page_config(page_title="Anedya IoT Dashboard", layout="wide")
 
 # Uncomment to enable autorefresh
-# count = st_autorefresh(interval=5000, limit=None, key="auto-refresh-handler")
+count = st_autorefresh(interval=1000, limit=None, key="auto-refresh-handler")
 
 # --------------- HELPER FUNCTIONS -----------------------
 
@@ -124,67 +124,73 @@ def drawDashboard():
     charts = st.columns(2, gap="small")
     with charts[0]:
         st.subheader(body="Humidity ", anchor=False)
-        humidity_chart_an = alt.Chart(data=humidityData).mark_area(
-            line={'color': '#1fa2ff'},
-            color=alt.Gradient(
-                gradient='linear',
-                stops=[alt.GradientStop(color='#1fa2ff', offset=1),
-                       alt.GradientStop(color='rgba(255,255,255,0)', offset=0)],
-                x1=1,
-                x2=1,
-                y1=1,
-                y2=0,
-            ),
-            interpolate='monotone',
-            cursor='crosshair'
-        ).encode(
-            x=alt.X(
-                shorthand="Datetime:T",
-                axis=alt.Axis(format="%Y-%m-%d %H:%M:%S", title="Datetime", tickCount=10, grid=True, tickMinStep=5),
-            ),  # T indicates temporal (time-based) data
-            y=alt.Y(
-                "aggregate:Q",
-                scale=alt.Scale(domain=[20, 60]),
-                axis=alt.Axis(title="Humidity (%)", grid=True, tickCount=10),
-            ),  # Q indicates quantitative data
-            tooltip=[alt.Tooltip('Datetime:T', format="%Y-%m-%d %H:%M:%S", title="Time",),
-                     alt.Tooltip('aggregate:Q', format="0.2f", title="Value")],
-        ).properties(height=400).interactive()
+        if humidityData.empty:
+            st.write("No Data Available!")
+        else:
+            humidity_chart_an = alt.Chart(data=humidityData).mark_area(
+                line={'color': '#1fa2ff'},
+                color=alt.Gradient(
+                    gradient='linear',
+                    stops=[alt.GradientStop(color='#1fa2ff', offset=1),
+                        alt.GradientStop(color='rgba(255,255,255,0)', offset=0)],
+                    x1=1,
+                    x2=1,
+                    y1=1,
+                    y2=0,
+                ),
+                interpolate='monotone',
+                cursor='crosshair'
+            ).encode(
+                x=alt.X(
+                    shorthand="Datetime:T",
+                    axis=alt.Axis(format="%Y-%m-%d %H:%M:%S", title="Datetime", tickCount=10, grid=True, tickMinStep=5),
+                ),  # T indicates temporal (time-based) data
+                y=alt.Y(
+                    "aggregate:Q",
+                    scale=alt.Scale(domain=[20, 60]),
+                    axis=alt.Axis(title="Humidity (%)", grid=True, tickCount=10),
+                ),  # Q indicates quantitative data
+                tooltip=[alt.Tooltip('Datetime:T', format="%Y-%m-%d %H:%M:%S", title="Time",),
+                        alt.Tooltip('aggregate:Q', format="0.2f", title="Value")],
+            ).properties(height=400).interactive()
 
-        # Display the Altair chart using Streamlit
-        st.altair_chart(humidity_chart_an, use_container_width=True)
+            # Display the Altair chart using Streamlit
+            st.altair_chart(humidity_chart_an, use_container_width=True)
 
     with charts[1]:
         st.subheader(body="Temperature", anchor=False)
-        temperature_chart_an = alt.Chart(data=temperatureData).mark_area(
-            line={'color': '#1fa2ff'},
-            color=alt.Gradient(
-                gradient='linear',
-                stops=[alt.GradientStop(color='#1fa2ff', offset=1),
-                       alt.GradientStop(color='rgba(255,255,255,0)', offset=0)],
-                x1=1,
-                x2=1,
-                y1=1,
-                y2=0,
-            ),
-            interpolate='monotone',
-            cursor='crosshair'
-        ).encode(
-            x=alt.X(
-                shorthand="Datetime:T",
-                axis=alt.Axis(format="%Y-%m-%d %H:%M:%S", title="Datetime", tickCount=10, grid=True, tickMinStep=5),
-            ),  # T indicates temporal (time-based) data
-            y=alt.Y(
-                "aggregate:Q",
-                # scale=alt.Scale(domain=[0, 100]),
-                scale=alt.Scale(zero=False, domain=[10, 50]),
-                axis=alt.Axis(title="Temperature (°C)", grid=True, tickCount=10),
-            ),  # Q indicates quantitative data
-            tooltip=[alt.Tooltip('Datetime:T', format="%Y-%m-%d %H:%M:%S", title="Time",),
-                     alt.Tooltip('aggregate:Q', format="0.2f", title="Value")],
-        ).properties(height=400).interactive()
+        if temperatureData.empty:
+            st.write("No Data Available!")
+        else:
+            temperature_chart_an = alt.Chart(data=temperatureData).mark_area(
+                line={'color': '#1fa2ff'},
+                color=alt.Gradient(
+                    gradient='linear',
+                    stops=[alt.GradientStop(color='#1fa2ff', offset=1),
+                        alt.GradientStop(color='rgba(255,255,255,0)', offset=0)],
+                    x1=1,
+                    x2=1,
+                    y1=1,
+                    y2=0,
+                ),
+                interpolate='monotone',
+                cursor='crosshair'
+            ).encode(
+                x=alt.X(
+                    shorthand="Datetime:T",
+                    axis=alt.Axis(format="%Y-%m-%d %H:%M:%S", title="Datetime", tickCount=10, grid=True, tickMinStep=5),
+                ),  # T indicates temporal (time-based) data
+                y=alt.Y(
+                    "aggregate:Q",
+                    # scale=alt.Scale(domain=[0, 100]),
+                    scale=alt.Scale(zero=False, domain=[10, 50]),
+                    axis=alt.Axis(title="Temperature (°C)", grid=True, tickCount=10),
+                ),  # Q indicates quantitative data
+                tooltip=[alt.Tooltip('Datetime:T', format="%Y-%m-%d %H:%M:%S", title="Time",),
+                        alt.Tooltip('aggregate:Q', format="0.2f", title="Value")],
+            ).properties(height=400).interactive()
 
-        st.altair_chart(temperature_chart_an, use_container_width=True)
+            st.altair_chart(temperature_chart_an, use_container_width=True)
 
 
 def operateFan():
@@ -217,7 +223,7 @@ def operateLight():
         st.toast("Light turned off!")
 
 
-# @st.cache_data(ttl=10, show_spinner=False)
+@st.cache_data(ttl=4, show_spinner=False)
 def GetFanStatus() -> list:
     value = anedya_getValue("Fan")
     if value[1] == 1:
@@ -231,7 +237,7 @@ def GetFanStatus() -> list:
     return value
 
 
-# @st.cache_data(ttl=10, show_spinner=False)
+@st.cache_data(ttl=4, show_spinner=False)
 def GetLightStatus() -> list:
     value = anedya_getValue("Bulb")
     if value[1] == 1:
