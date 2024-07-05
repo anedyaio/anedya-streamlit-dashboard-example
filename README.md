@@ -22,7 +22,7 @@ The Anedya IoT cloud enables users to monitor and control IoT devices remotely. 
 - **API Key:** Obtain the API key from the Anedya dashboard by navigating to the project -> APIKEY.
 
 ## Integration with hardware
-Connect your Nodemcu with a DHT sensor and a relay module as per the [basic-home-automation with nodeMcu](https://github.com/anedyaio/anedya-example-nodemcu/tree/main/basic-home-automation),[basic-home-automation with pico](https://github.com/anedyaio/anedya-example-pico/tree/main/Thonny/basic-home-automation/pico) example. Upload the provided sketch from the repo to read sensor data and control devices.Follow the detailed instructions in the README.
+Connect your Nodemcu with a DHT sensor and a relay module as per the [basic-home-automation with nodeMcu](https://github.com/anedyaio/anedya-example-nodemcu/tree/main/basic-home-automation), [basic-home-automation with pico](https://github.com/anedyaio/anedya-example-pico/tree/main/Thonny/basic-home-automation/pico) example. Upload the provided sketch from the repo to read sensor data and control devices.Follow the detailed instructions in the README.
 
 ## Usage
 
