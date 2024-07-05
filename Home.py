@@ -13,9 +13,8 @@ from utils.anedya import anedya_setValue
 from utils.anedya import fetchHumidityData
 from utils.anedya import fetchTemperatureData
 
-# nodeId = "20deeee8-f8ae-11ee-9dd8-c3aa61afe2fb"  # get it from anedya dashboard -> project -> node 
-nodeId = "YOUR-NODE-ID"  # get it from anedya dashboard -> project -> node 
-apiKey = "YOUR-CONNECTION-KEY"  # aneyda project apikey
+nodeId = "NODE-ID"  # get it from anedya dashboard -> project -> node 
+apiKey = "YOUR-API-KEY"  # aneyda project apikey
 
 st.set_page_config(page_title="Anedya IoT Dashboard", layout="wide")
 

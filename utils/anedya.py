@@ -169,7 +169,8 @@ def fetchHumidityData() -> pd.DataFrame:
 
         return chart_data
     else:
-        st.write(response_message)
+        # st.write(response_message)
+        print(response_message)
         value = pd.DataFrame()
         return value
 
@@ -243,6 +244,7 @@ def fetchTemperatureData() -> pd.DataFrame:
 
         return chart_data
     else:
-        st.write(response_message)
+        # st.write(response_message)
+        print(response_message)
         value = pd.DataFrame()
         return value
