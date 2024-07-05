@@ -1,4 +1,4 @@
-![<img src="https://img.shields.io/badge/Anedya-Documentation-blue?style=for-the-badge">](https://docs.anedya.io?utm_source=github&utm_medium=link&utm_campaign=github-examples&utm_content=streamlit-dashboard)
+[<img src="https://img.shields.io/badge/Anedya-Documentation-blue?style=for-the-badge">](https://docs.anedya.io?utm_source=github&utm_medium=link&utm_campaign=github-examples&utm_content=streamlit-dashboard)
 
 # anedya-streamlit-dashboard-example
 An example dashboard developed in streamlit
