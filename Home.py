@@ -15,8 +15,8 @@ apiKey = "YOUR-API-KEY"  # aneyda project apikey
 
 st.set_page_config(page_title="Anedya IoT Dashboard", layout="wide")
 
-# Uncomment to enable autorefresh
-count = st_autorefresh(interval=1000, limit=None, key="auto-refresh-handler")
+
+st_autorefresh(interval=10000, limit=None, key="auto-refresh-handler")
 
 # --------------- HELPER FUNCTIONS -----------------------
 
