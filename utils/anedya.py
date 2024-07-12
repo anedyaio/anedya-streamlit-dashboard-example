@@ -1,10 +1,10 @@
 import streamlit as st
-import json
 import time
+import json
 import requests
 import pandas as pd
-import pytz  # Add this import for time zone conversion
 import os
+import pytz  # Add this import for time zone conversion
 
 from utils.global_vars import nodeId, apiKey
 
@@ -36,10 +36,6 @@ def anedya_sendCommand(COMMAND_NAME:str, COMMAND_DATA:str):
 
     requests.request("POST", url, headers=headers, data=payload)
 
-    # print(response.text)
-    # st.write(response.text)
-
-
 def anedya_setValue(KEY, VALUE):
     url = "https://api.anedya.io/v1/valuestore/setValue"
     apiKey_in_formate = "Bearer " + apiKey
@@ -60,8 +56,6 @@ def anedya_setValue(KEY, VALUE):
     }
     response = requests.request("POST", url, headers=headers, data=payload)
 
-    # print(response.status_code)
-    # print(payload)
     print(response.text)
     return response
 
@@ -92,8 +86,7 @@ def anedya_getValue(KEY):
         value = [data, 1]
     else:
         print(responseMessage)
-        # st.write("No previous value!!")
-        value = [False, -1]
+        value = [0.00, -1]
 
     return value
 
@@ -183,7 +176,6 @@ def fetchHumidityData() -> pd.DataFrame:
 
         return chart_data
     else:
-        #st.write(response_message)
         value = pd.DataFrame()
         return value
 
@@ -270,7 +262,6 @@ def fetchTemperatureData() -> pd.DataFrame:
 
         return chart_data
     else:
-        #st.write(response_message)
         value = pd.DataFrame()
         return value
 
