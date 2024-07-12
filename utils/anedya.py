@@ -4,6 +4,8 @@ import time
 import requests
 import pandas as pd
 import pytz  # Add this import for time zone conversion
+import os
+
 from utils.global_vars import nodeId, apiKey
 
 
