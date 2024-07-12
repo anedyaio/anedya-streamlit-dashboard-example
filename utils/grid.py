@@ -4,7 +4,7 @@ import math
 import pandas as pd
 
 from utils import charts
-from utils.action_buttons  import operateFan,operateExhaustFan,operateHumidifier,operateHomeVantilater
+from utils.action_buttons  import operateFan,operateExhaustFan,operateHumidifier,operateHomeVantilater,ButtonText,CurrentData,State
 from utils.global_vars import multiselect, select
 
 
@@ -47,6 +47,10 @@ def date_range() -> pd._libs.tslibs.timestamps.Timestamp:
     end_date=pd.Timestamp(day=end_date.day,month=end_date.month,year=end_date.year,hour=end_hour,minute=end_min,second=end_sec)
 
     return start_date,end_date
+
+State()
+ButtonText()
+CurrentData()
 
 def singlegrid():
     global select
