@@ -1,6 +1,9 @@
 # utils/charts.py
 import streamlit as st
 import altair as alt
+import os
+import pandas as pd
+from pytz import timezone
 
 from utils.global_vars import temperatureData, humidityData
 
@@ -12,7 +15,14 @@ def HumidityChart(start_date,end_date):
     if os.path.exists(csv_file):
         humidity_data = pd.read_csv(csv_file, index_col='Datetime', parse_dates=True)
 
-        # Filter data within the specified range
+        # Assume input is in IST, localize it to IST timezone
+        ist = timezone('Asia/Kolkata')
+        start_date = ist.localize(start_date.replace(tzinfo=None))
+        end_date = ist.localize(end_date.replace(tzinfo=None))
+        print(type(start_date))
+        print(start_date)
+        print(end_date)
+
         filtered_data = humidity_data[(humidity_data.index >= start_date) & (humidity_data.index <= end_date)]
 
         if not filtered_data.empty:
@@ -59,11 +69,18 @@ def TemperatureChart(start_date,end_date):
     if os.path.exists(csv_file):
         temperature_data = pd.read_csv(csv_file, index_col='Datetime', parse_dates=True)
 
-        # Filter data within the specified range
+         # Assume input is in IST, localize it to IST timezone
+        ist = timezone('Asia/Kolkata')
+        start_date = ist.localize(start_date.replace(tzinfo=None))
+        end_date = ist.localize(end_date.replace(tzinfo=None))
+        print(type(start_date))
+        print(start_date)
+        print(end_date)
+
         filtered_data = temperature_data[(temperature_data.index >= start_date) & (temperature_data.index <= end_date)]
     
-        if not temperatureData.empty:
-            temperature_chart_an = alt.Chart(data=temperatureData[(temperatureData['Datetime']>=start_date)&(temperatureData['Datetime']<=end_date)]).mark_area(
+        if not filtered_data.empty:
+            temperature_chart_an = alt.Chart(filtered_data.reset_index()).mark_area(
                 line={'color': '#1fa2ff'},
                 color=alt.Gradient(
                     gradient='linear',
