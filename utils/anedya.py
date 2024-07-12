@@ -154,20 +154,21 @@ def fetchHumidityData() -> pd.DataFrame:
 
             st.session_state.CurrentHumidity = round((data_list[0]["aggregate"]), 2)
             df = pd.DataFrame(data_list)
+
             # Convert timestamp to datetime and set it as the index
             df["Datetime"] = pd.to_datetime(df["timestamp"], unit="s")
             local_tz = pytz.timezone("Asia/Kolkata")  # Change to your local time zone
             df["Datetime"] = df["Datetime"].dt.tz_localize("UTC").dt.tz_convert(local_tz)
             df.set_index("Datetime", inplace=True)
+
             # Drop the original 'timestamp' column as it's no longer needed
             df.drop(columns=["timestamp"], inplace=True)
-            # print(df.head(70))
             
              # Load existing data from CSV if it exists
             csv_file = 'humidity_data.csv'
             if os.path.exists(csv_file):
                 existing_data = pd.read_csv(csv_file, index_col='Datetime', parse_dates=True)
-                st.session_state.humidity_data = pd.concat([existing_data, df])
+                st.session_state.humidity_data = pd.concat([existing_data, df]).drop_duplicates().sort_index()
             else:
                 st.session_state.humidity_data = df
 
@@ -254,7 +255,7 @@ def fetchTemperatureData() -> pd.DataFrame:
             csv_file = 'temperature_data.csv'
             if os.path.exists(csv_file):
                 existing_data = pd.read_csv(csv_file, index_col='Datetime', parse_dates=True)
-                st.session_state.temperature_data = pd.concat([existing_data, df])
+                st.session_state.temperature_data = pd.concat([existing_data, df]).drop_duplicates().sort_index()
             else:
                 st.session_state.temperature_data = df
 
