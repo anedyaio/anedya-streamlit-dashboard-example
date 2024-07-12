@@ -1,21 +1,20 @@
-import json
-import requests
-import time
 import streamlit as st
+import json
+import time
+import requests
 import pandas as pd
 import pytz  # Add this import for time zone conversion
-
-nodeId = ""
-apiKey = ""
+from utils.global_vars import nodeId, apiKey
 
 
-def anedya_config(NODE_ID, API_KEY):
+def anedya_config(NODE_ID:str, API_KEY:str) -> None :
     global nodeId, apiKey
     nodeId = NODE_ID
     apiKey = API_KEY
+    return None
 
 
-def anedya_sendCommand(COMMAND_NAME, COMMAND_DATA):
+def anedya_sendCommand(COMMAND_NAME:str, COMMAND_DATA:str):
 
     url = "https://api.anedya.io/v1/commands/send"
     apiKey_in_formate = "Bearer " + apiKey
@@ -117,7 +116,7 @@ def fetchHumidityData() -> pd.DataFrame:
                 },
                 "interval": {
                     "measure": "minute",
-                    "interval": 5
+                    "interval": 1
                 },
                 "responseOptions": {
                     "timezone": "UTC"
@@ -151,7 +150,7 @@ def fetchHumidityData() -> pd.DataFrame:
 
         if data_list:
 
-            st.session_state.CurrentHumidity = round(data_list[0]["aggregate"], 2)
+            st.session_state.CurrentHumidity = round((data_list[0]["aggregate"]), 2)
             df = pd.DataFrame(data_list)
             # Convert timestamp to datetime and set it as the index
             df["Datetime"] = pd.to_datetime(df["timestamp"], unit="s")
@@ -161,16 +160,29 @@ def fetchHumidityData() -> pd.DataFrame:
             # Drop the original 'timestamp' column as it's no longer needed
             df.drop(columns=["timestamp"], inplace=True)
             # print(df.head(70))
+            
+             # Load existing data from CSV if it exists
+            csv_file = 'humidity_data.csv'
+            if os.path.exists(csv_file):
+                existing_data = pd.read_csv(csv_file, index_col='Datetime', parse_dates=True)
+                st.session_state.humidity_data = pd.concat([existing_data, df])
+            else:
+                st.session_state.humidity_data = df
+
+            # Save the updated data to CSV
+            st.session_state.humidity_data.to_csv(csv_file)
+
             # Reset the index to prepare for Altair chart
-            chart_data = df.reset_index()
+            chart_data = st.session_state.humidity_data.reset_index()
+
+        else:
+            chart_data = pd.DataFrame()
 
         return chart_data
     else:
-        # st.write(response_message)
-        print(response_message)
+        #st.write(response_message)
         value = pd.DataFrame()
         return value
-
 
 @st.cache_data(ttl=30, show_spinner=False)
 def fetchTemperatureData() -> pd.DataFrame:
@@ -192,7 +204,7 @@ def fetchTemperatureData() -> pd.DataFrame:
                 },
                 "interval": {
                     "measure": "minute",
-                    "interval": 5
+                    "interval": 1
                 },
                 "responseOptions": {
                     "timezone": "UTC"
@@ -235,12 +247,52 @@ def fetchTemperatureData() -> pd.DataFrame:
             # Droped the original 'timestamp' column as it's no longer needed
             df.drop(columns=["timestamp"], inplace=True)
             # print(df.head())
+            
+            # Load existing data from CSV if it exists
+            csv_file = 'temperature_data.csv'
+            if os.path.exists(csv_file):
+                existing_data = pd.read_csv(csv_file, index_col='Datetime', parse_dates=True)
+                st.session_state.temperature_data = pd.concat([existing_data, df])
+            else:
+                st.session_state.temperature_data = df
+
+            # Save the updated data to CSV
+            st.session_state.temperature_data.to_csv(csv_file)
+
             # Reset the index to prepare for Altair chart
-            chart_data = df.reset_index()
+            chart_data = st.session_state.temperature_data.reset_index()
+
+        else:
+            chart_data = pd.DataFrame()
 
         return chart_data
     else:
-        # st.write(response_message)
-        print(response_message)
+        #st.write(response_message)
         value = pd.DataFrame()
         return value
+
+@st.cache_data(ttl=15, show_spinner=False)
+def GetFanStatus() -> list:
+    value = anedya_getValue("Fan")
+    if value[1] == 1:
+        on = value[0]
+        if on:
+            st.session_state.FanState = True
+            st.session_state.FanButtonText = "Turn Fan Off!"
+        else:
+            st.session_state.FanState = False
+            st.session_state.FanButtonText = "Turn Fan On!"
+    return value
+
+@st.cache_data(ttl=15, show_spinner=False)
+def GetHumidifierStatus() -> list:
+    value = anedya_getValue("Humidifier")
+    if value[1] == 1:
+        on = value[0]
+        if on:
+            st.session_state.HumidifierState = True
+            st.session_state.HumidifierButtonText = "Turn Humidifier Off!"
+        else:
+            st.session_state.LightState = False
+            st.session_state.HumidifierButtonText = "Turn Humidifier On!"
+    return value
