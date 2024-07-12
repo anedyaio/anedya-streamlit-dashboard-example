@@ -1,11 +1,11 @@
 # utils/charts.py
 import streamlit as st
-import altair as alt
 import os
 import pandas as pd
 from pytz import timezone
+import altair as alt
 
-from utils.global_vars import temperatureData, humidityData
+# from utils.global_vars import temperatureData, humidityData
 
 
 def HumidityChart(start_date,end_date):
@@ -19,9 +19,6 @@ def HumidityChart(start_date,end_date):
         ist = timezone('Asia/Kolkata')
         start_date = ist.localize(start_date.replace(tzinfo=None))
         end_date = ist.localize(end_date.replace(tzinfo=None))
-        print(type(start_date))
-        print(start_date)
-        print(end_date)
 
         filtered_data = humidity_data[(humidity_data.index >= start_date) & (humidity_data.index <= end_date)]
 
@@ -73,9 +70,6 @@ def TemperatureChart(start_date,end_date):
         ist = timezone('Asia/Kolkata')
         start_date = ist.localize(start_date.replace(tzinfo=None))
         end_date = ist.localize(end_date.replace(tzinfo=None))
-        print(type(start_date))
-        print(start_date)
-        print(end_date)
 
         filtered_data = temperature_data[(temperature_data.index >= start_date) & (temperature_data.index <= end_date)]
     
