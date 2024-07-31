@@ -43,19 +43,18 @@ def anedya_setValue(KEY, VALUE):
     url = "https://api.anedya.io/v1/valuestore/setValue"
     apiKey_in_formate = "Bearer " + apiKey
 
-    payload = json.dumps({
-        "namespace": {
-            "scope": "node",
-            "id": nodeId
-        },
-        "key": KEY,
-        "value": VALUE,
-        "type": "boolean"
-    })
+    payload = json.dumps(
+        {
+            "namespace": {"scope": "node", "id": nodeId},
+            "key": KEY,
+            "value": VALUE,
+            "type": "boolean",
+        }
+    )
     headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        "Authorization": apiKey_in_formate
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": apiKey_in_formate,
     }
     response = requests.request("POST", url, headers=headers, data=payload)
 
@@ -69,17 +68,11 @@ def anedya_getValue(KEY):
     url = "https://api.anedya.io/v1/valuestore/getValue"
     apiKey_in_formate = "Bearer " + apiKey
 
-    payload = json.dumps({
-        "namespace": {
-            "scope": "node",
-            "id": nodeId
-        },
-        "key": KEY
-    })
+    payload = json.dumps({"namespace": {"scope": "node", "id": nodeId}, "key": KEY})
     headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        "Authorization": apiKey_in_formate
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": apiKey_in_formate,
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
@@ -96,67 +89,95 @@ def anedya_getValue(KEY):
 
     return value
 
+@st.cache_data(ttl=1, show_spinner=False)
+def anedya_get_latestData(param_variable_identifier: str)->int:
+    url = "https://api.anedya.io/v1/data/latest"
+    apiKey_in_formate = "Bearer " + apiKey
 
-@st.cache_data(ttl=30, show_spinner=False)
-def fetchHumidityData() -> pd.DataFrame:
+    payload = json.dumps({"nodes": [nodeId], "variable": param_variable_identifier})
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": apiKey_in_formate,
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    response_message = response.text
+    data = json.loads(response_message).get("data")[0].get("value")
+    # print(data)
+    return data
+
+
+def anedya_getData(
+    param_variable_identifier: str,
+    param_from: int,
+    param_to: int,
+    param_aggregation_interval_in_minutes: int,
+) -> list:
     url = "https://api.anedya.io/v1/aggregates/variable/byTime"
     apiKey_in_formate = "Bearer " + apiKey
 
-    currentTime = int(time.time())
-    pastHour_Time = int(currentTime - 86400)
-
     payload = json.dumps(
         {
-            "variable": "humidity",
-            "from": pastHour_Time,
-            "to": currentTime,
+            "variable": param_variable_identifier,
+            "from": param_from,
+            "to": param_to,
             "config": {
-                "aggregation": {
-                    "compute": "avg",
-                    "forEachNode": True
-                },
+                "aggregation": {"compute": "avg", "forEachNode": True},
                 "interval": {
                     "measure": "minute",
-                    "interval": 5
+                    "interval": param_aggregation_interval_in_minutes,
                 },
-                "responseOptions": {
-                    "timezone": "UTC"
-                },
-                "filter": {
-                    "nodes": [
-                        nodeId
-                    ],
-                    "type": "include"
-                }
-            }
+                "responseOptions": {"timezone": "UTC"},
+                "filter": {"nodes": [nodeId], "type": "include"},
+            },
         }
     )
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Authorization": apiKey_in_formate
+        "Authorization": apiKey_in_formate,
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
     response_message = response.text
+    res_code = response.status_code
+    return [response_message, res_code]
 
-    if response.status_code == 200:
+
+@st.cache_data(ttl=30, show_spinner=False)
+def fetchHumidityData(param_from, param_to) -> pd.DataFrame:
+    # currentTime = int(time.time())
+    # pastHour_Time = int(currentTime - 86400)
+    # st.session_state.counter=st.session_state.counter+1
+    # st.write(st.session_state.counter)
+
+    response_message = anedya_getData(
+        "humidity",
+        param_from=param_from,
+        param_to=param_to,
+        param_aggregation_interval_in_minutes=5,
+    )
+
+    if response_message[1] == 200:
         data_list = []
 
         # Parse JSON string
-        response_data = json.loads(response_message).get("data")
+        response_data = json.loads(response_message[0]).get("data")
         for timeStamp, value in reversed(response_data.items()):
             for entry in reversed(value):
                 data_list.append(entry)
 
         if data_list:
 
-            st.session_state.CurrentHumidity = round(data_list[0]["aggregate"], 2)
+            # st.session_state.CurrentHumidity = round(data_list[0]["aggregate"], 2)
             df = pd.DataFrame(data_list)
             # Convert timestamp to datetime and set it as the index
             df["Datetime"] = pd.to_datetime(df["timestamp"], unit="s")
             local_tz = pytz.timezone("Asia/Kolkata")  # Change to your local time zone
-            df["Datetime"] = df["Datetime"].dt.tz_localize("UTC").dt.tz_convert(local_tz)
+            df["Datetime"] = (
+                df["Datetime"].dt.tz_localize("UTC").dt.tz_convert(local_tz)
+            )
             df.set_index("Datetime", inplace=True)
             # Drop the original 'timestamp' column as it's no longer needed
             df.drop(columns=["timestamp"], inplace=True)
@@ -167,69 +188,41 @@ def fetchHumidityData() -> pd.DataFrame:
         return chart_data
     else:
         # st.write(response_message)
-        print(response_message)
+        print(response_message[0])
         value = pd.DataFrame()
         return value
 
 
 @st.cache_data(ttl=30, show_spinner=False)
-def fetchTemperatureData() -> pd.DataFrame:
-    url = "https://api.anedya.io/v1/aggregates/variable/byTime"
-    apiKey_in_formate = "Bearer " + apiKey
+def fetchTemperatureData(param_from=0, param_to=0) -> pd.DataFrame:
 
-    currentTime = int(time.time())
-    pastHour_Time = int(currentTime - 86400)
+    # currentTime = int(time.time())    #to means recent time
+    # pastHour_Time = int(currentTime - 86400)
 
-    payload = json.dumps(
-        {
-            "variable": "temperature",
-            "from": pastHour_Time,
-            "to": currentTime,
-            "config": {
-                "aggregation": {
-                    "compute": "avg",
-                    "forEachNode": True
-                },
-                "interval": {
-                    "measure": "minute",
-                    "interval": 5
-                },
-                "responseOptions": {
-                    "timezone": "UTC"
-                },
-                "filter": {
-                    "nodes": [
-                        nodeId
-                    ],
-                    "type": "include"
-                }
-            }
-        }
+    response_message = anedya_getData(
+        "temperature",
+        param_from=param_from,
+        param_to=param_to,
+        param_aggregation_interval_in_minutes=5,
     )
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": apiKey_in_formate
-    }
 
-    response = requests.request("POST", url, headers=headers, data=payload)
-    response_message = response.text
-
-    if response.status_code == 200:
+    if response_message[1] == 200:
         data_list = []
 
         # Parse JSON string
-        response_data = json.loads(response_message).get("data")
+        response_data = json.loads(response_message[0]).get("data")
         for timeStamp, value in reversed(response_data.items()):
             for entry in reversed(value):
                 data_list.append(entry)
 
         if data_list:
-            st.session_state.CurrentTemperature = round(data_list[0]["aggregate"], 2)
+            # st.session_state.CurrentTemperature = round(data_list[0]["aggregate"], 2)
             df = pd.DataFrame(data_list)
             df["Datetime"] = pd.to_datetime(df["timestamp"], unit="s")
             local_tz = pytz.timezone("Asia/Kolkata")  # Change to your local time zone
-            df["Datetime"] = df["Datetime"].dt.tz_localize("UTC").dt.tz_convert(local_tz)
+            df["Datetime"] = (
+                df["Datetime"].dt.tz_localize("UTC").dt.tz_convert(local_tz)
+            )
             df.set_index("Datetime", inplace=True)
 
             # Droped the original 'timestamp' column as it's no longer needed
@@ -241,6 +234,6 @@ def fetchTemperatureData() -> pd.DataFrame:
         return chart_data
     else:
         # st.write(response_message)
-        print(response_message)
+        print(response_message[0])
         value = pd.DataFrame()
         return value
