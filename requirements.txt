@@ -4,3 +4,4 @@ altair
 pytz
 requests
 streamlit-autorefresh
+streamviz
