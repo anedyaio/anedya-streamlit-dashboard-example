@@ -94,8 +94,9 @@ def main():
         # Get the current date
         current_date = datetime.now()
         # Extract the year, month, and day
-        hour = current_date.hour
-        minute = current_date.minute
+        reset_date = current_date - timedelta(hours=3.8)
+        hour = reset_date.hour
+        minute = reset_date.minute
         # Create a date object
         current_time_object = time(hour, minute)       
         st.session_state.from_time = current_time_object
@@ -126,8 +127,17 @@ def main():
         # st.write(st.session_state.counter)
         st.session_state.CurrentHumidity = anedya_get_latestData("humidity")
         st.session_state.CurrentTemperature = anedya_get_latestData("temperature")
-        humidityData = fetchHumidityData(param_from=st.session_state.from_input_time, param_to=st.session_state.to_input_time)
-        temperatureData = fetchTemperatureData(param_from=st.session_state.from_input_time, param_to=st.session_state.to_input_time)
+
+        interval=st.session_state.to_input_time - st.session_state.from_input_time
+        agg_interval=10
+        if interval > 2592000:
+            agg_interval = 60
+        elif interval > 864000:
+            agg_interval = 30
+        elif interval > 86400:
+            agg_interval = 10
+        humidityData = fetchHumidityData(param_from=st.session_state.from_input_time, param_to=st.session_state.to_input_time,param_aggregation_interval_in_minutes=agg_interval)
+        temperatureData = fetchTemperatureData(param_from=st.session_state.from_input_time, param_to=st.session_state.to_input_time,param_aggregation_interval_in_minutes=agg_interval)
 
         GetFanStatus()
         GetLightStatus()
@@ -283,7 +293,9 @@ def drawDashboard():
                     st.rerun()
 
         with datetime_cols[2]:
-            st.button(label="Set Default", on_click=reset_time_range)
+            reset_btn=st.button(label="Set Default", on_click=reset_time_range)
+            if reset_btn:
+                st.rerun()
 
     # ------------------------chart container------------------------
     with st.container():
@@ -482,7 +494,14 @@ def reset_time_range():
     # Create a date object
     current_time_object = time(hour, minute)       
     st.session_state.to_time = current_time_object
-    st.session_state.from_time = current_time_object
+
+    # Extract the year, month, and day
+    reset_date = current_date - timedelta(hours=3.8)
+    hour = reset_date.hour
+    minute = reset_date.minute
+    # Create a date object
+    from_time_object = time(hour, minute)       
+    st.session_state.from_time = from_time_object
     
     # Extract the year, month, and day
     current_year = current_date.year
@@ -502,7 +521,7 @@ def reset_time_range():
     yesterday_date_object = date(yesterday_year, yesterday_month, yesterday_day)
     st.session_state.from_date = yesterday_date_object
 
-    st.rerun()
+    # st.rerun()
 
 
 if __name__ == "__main__":
