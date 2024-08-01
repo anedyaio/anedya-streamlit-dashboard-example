@@ -89,7 +89,7 @@ def anedya_getValue(KEY):
 
     return value
 
-@st.cache_data(ttl=1, show_spinner=False)
+@st.cache_data(ttl=20, show_spinner=False)
 def anedya_get_latestData(param_variable_identifier: str)->int:
     url = "https://api.anedya.io/v1/data/latest"
     apiKey_in_formate = "Bearer " + apiKey

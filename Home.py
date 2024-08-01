@@ -15,13 +15,13 @@ from utils.anedya import fetchHumidityData
 from utils.anedya import fetchTemperatureData
 from utils.anedya import anedya_get_latestData
 
-nodeId = ""  # get it from anedya dashboard -> project -> node
-apiKey = ""  # aneyda project apikey
+nodeId = "NODE_ID"  # get it from anedya dashboard -> project -> node
+apiKey = "API_KEY"  # aneyda project apikey
 
 st.set_page_config(page_title="Anedya IoT Dashboard", layout="wide")
 
 
-st_autorefresh(interval=10000, limit=None, key="auto-refresh-handler")
+st_autorefresh(interval=20000, limit=None, key="auto-refresh-handler")
 
 # --------------- HELPER FUNCTIONS -----------------------
 
