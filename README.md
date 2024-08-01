@@ -8,7 +8,7 @@ An example dashboard developed in streamlit
 </p>
 The Anedya IoT cloud enables users to monitor and control IoT devices remotely. The dashboard displays real-time data on humidity and temperature, as well as providing control buttons to operate a fan and a light. The control buttons sync with real-time changes, reflecting the current state of the devices. 
 
-![Demo Dashboard](./docs/anedya_dashboard.png)
+![Demo Dashboard](./docs/main_dash.png)
 ![Gauge-Image](./docs/graph.png)
 
 ## Features
