@@ -15,8 +15,8 @@ from utils.anedya import fetchHumidityData
 from utils.anedya import fetchTemperatureData
 from utils.anedya import anedya_get_latestData
 
-nodeId = "NODE_ID"  # get it from anedya dashboard -> project -> node
-apiKey = "API_KEY"  # aneyda project apikey
+nodeId = ""  # get it from anedya dashboard -> project -> node
+apiKey = ""  # aneyda project apikey
 
 st.set_page_config(page_title="Anedya IoT Dashboard", layout="wide")
 
@@ -64,7 +64,6 @@ def main():
         st.session_state.CurrentTemperature = 0
     if "counter" not in st.session_state:
         st.session_state.counter = 0
-
 
     if "from_date" not in st.session_state:
         # Get the current date
@@ -118,6 +117,8 @@ def main():
         current_date = datetime.now()
         epoach_time=int(current_date.timestamp())
         st.session_state.to_input_time = epoach_time
+
+        
     if st.session_state.LoggedIn is False:
         drawLogin()
     else:
@@ -211,17 +212,24 @@ def drawDashboard():
     #     pass
 
     st.subheader(body="Controls", anchor=False)
-    buttons = st.columns(2, gap="small")
+    buttons = st.columns([0.2,0.2,0.6], gap="small")
     with buttons[0]:
-        st.text("Control Fan:")
-        st.button(label=st.session_state.FanButtonText, on_click=operateFan)
+        org_btn1=st.columns([0.4,0.6], gap="small",vertical_alignment="center")
+        with org_btn1[0]:
+            st.text("Control Fan:")
+        with org_btn1[1]:
+            st.button(label=st.session_state.FanButtonText, on_click=operateFan)
+
     with buttons[1]:
-        st.text("Control Light:")
-        st.button(label=st.session_state.LightButtonText, on_click=operateLight)
+        org_btn2=st.columns([0.47,0.53], gap="small",vertical_alignment="center")
+        with org_btn2[0]:
+            st.text("Control Light:")
+        with org_btn2[1]:
+            st.button(label=st.session_state.LightButtonText, on_click=operateLight)
 
     with st.container():
         st.subheader(body="Time Range", anchor=False)
-        datetime_cols = st.columns(2)
+        datetime_cols = st.columns([1,1,0.2], gap="small", vertical_alignment="bottom")
         with datetime_cols[0]:
             from_cols=st.columns(2, gap="small")
             with from_cols[0]:
@@ -273,6 +281,9 @@ def drawDashboard():
                 if to_time!=st.session_state.to_input_time:
                     st.session_state.to_input_time=to_time
                     st.rerun()
+
+        with datetime_cols[2]:
+            st.button(label="Set Default", on_click=reset_time_range)
 
     # ------------------------chart container------------------------
     with st.container():
@@ -343,7 +354,7 @@ def drawDashboard():
                 else:
                     temperature_chart_an = (
                         alt.Chart(data=temperatureData)
-                        .mark_area(
+                        .mark_area( # type: ignore
                             line={"color": "#1fa2ff"},
                             color=alt.Gradient(
                                 gradient="linear",
@@ -461,6 +472,37 @@ def GetLightStatus() -> list:
             st.session_state.LightState = False
             st.session_state.LightButtonText = "Turn Light On!"
     return value
+
+def reset_time_range():
+    # Get the current date
+    current_date = datetime.now()
+    # Extract the year, month, and day
+    hour = current_date.hour
+    minute = current_date.minute
+    # Create a date object
+    current_time_object = time(hour, minute)       
+    st.session_state.to_time = current_time_object
+    st.session_state.from_time = current_time_object
+    
+    # Extract the year, month, and day
+    current_year = current_date.year
+    current_month = current_date.month
+    current_day = current_date.day
+    # Create a date object
+    current_date_object = date(current_year, current_month, current_day)
+    st.session_state.to_date = current_date_object
+
+    # Subtract one day to get yesterday's date
+    yesterday_date = current_date - timedelta(days=1)
+    # Extract the year, month, and day
+    yesterday_year = yesterday_date.year
+    yesterday_month = yesterday_date.month
+    yesterday_day = yesterday_date.day
+    # Create a date object for yesterday
+    yesterday_date_object = date(yesterday_year, yesterday_month, yesterday_day)
+    st.session_state.from_date = yesterday_date_object
+
+    st.rerun()
 
 
 if __name__ == "__main__":
