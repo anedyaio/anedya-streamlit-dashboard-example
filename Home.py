@@ -18,6 +18,7 @@ from utils.anedya import anedya_get_latestData
 nodeId = "NODE_ID"  # get it from anedya dashboard -> project -> node
 apiKey = "API_KEY"  # aneyda project apikey
 
+
 st.set_page_config(page_title="Anedya IoT Dashboard", layout="wide")
 
 
@@ -101,13 +102,19 @@ def main():
         current_time_object = time(hour, minute)       
         st.session_state.from_time = current_time_object
     if "to_time" not in st.session_state:
-        # Get the current date
-        current_date = datetime.now()
-        # Extract the year, month, and day
+
+        # Get the current date and time in the Indian time zone
+        indian_time_zone = pytz.timezone('Asia/Kolkata')
+        current_date = datetime.now(indian_time_zone)
+
+        # Extract the hour and minute
         hour = current_date.hour
         minute = current_date.minute
-        # Create a date object
-        current_time_object = time(hour, minute)       
+
+        # Create a time object
+        current_time_object = time(hour, minute)
+
+        # Assuming `st` is your Streamlit session state
         st.session_state.to_time = current_time_object
 
     if "from_input_time" not in st.session_state:
@@ -486,13 +493,19 @@ def GetLightStatus() -> list:
     return value
 
 def reset_time_range():
-    # Get the current date
-    current_date = datetime.now()
-    # Extract the year, month, and day
+
+    # Get the current date and time in the Indian time zone
+    indian_time_zone = pytz.timezone('Asia/Kolkata')
+    current_date = datetime.now(indian_time_zone)
+
+    # Extract the hour and minute
     hour = current_date.hour
     minute = current_date.minute
-    # Create a date object
-    current_time_object = time(hour, minute)       
+
+    # Create a time object
+    current_time_object = time(hour, minute)
+
+    # Assuming `st` is your Streamlit session state
     st.session_state.to_time = current_time_object
 
     # Extract the year, month, and day
