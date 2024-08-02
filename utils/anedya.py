@@ -90,7 +90,7 @@ def anedya_getValue(KEY):
     return value
 
 @st.cache_data(ttl=15, show_spinner=False)
-def anedya_get_latestData(param_variable_identifier: str)->int:
+def anedya_get_latestData(param_variable_identifier: str)->list:
     url = "https://api.anedya.io/v1/data/latest"
     apiKey_in_formate = "Bearer " + apiKey
 
@@ -104,8 +104,9 @@ def anedya_get_latestData(param_variable_identifier: str)->int:
     response = requests.request("POST", url, headers=headers, data=payload)
     response_message = response.text
     data = json.loads(response_message).get("data")[0].get("value")
-    # print(data)
-    return data
+    timestamp = json.loads(response_message).get("data")[0].get("timestamp")
+    # print(data, timestamp)
+    return [data, timestamp]
 
 
 def anedya_getData(

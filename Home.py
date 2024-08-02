@@ -18,8 +18,7 @@ from utils.anedya import anedya_get_latestData
 nodeId = "NODE_ID"  # get it from anedya dashboard -> project -> node
 apiKey = "API_KEY"  # aneyda project apikey
 
-nodeId = "20deeee8-f8ae-11ee-9dd8-c3aa61afe2fb"  # get it from anedya dashboard -> project -> node
-apiKey = "c93b7fdbcb11a189e8f33a89d1bfa56f92836d5ed3c148ec9bf912f29a9abee5"  # aneyda project apikey
+
 
 st.set_page_config(page_title="Anedya IoT Dashboard", layout="wide")
 
@@ -36,13 +35,14 @@ def V_SPACE(lines):
 
 humidityData = pd.DataFrame()
 temperatureData = pd.DataFrame()
+current_temp_data_datetime = 0
 
 
 
 def main():
 
     anedya_config(nodeId, apiKey)
-    global humidityData, temperatureData
+    global humidityData, temperatureData,current_temp_data_datetime
 
     # Initialize the log in state if does not exist
     if "LoggedIn" not in st.session_state:
@@ -99,8 +99,17 @@ def main():
     else:
         # st.session_state.counter=st.session_state.counter+1
         # st.write(st.session_state.counter)
-        st.session_state.CurrentHumidity = anedya_get_latestData("humidity")
-        st.session_state.CurrentTemperature = anedya_get_latestData("temperature")
+        res_humidity = anedya_get_latestData("humidity")
+        st.session_state.CurrentHumidity = res_humidity[0]
+        res_tem=anedya_get_latestData("temperature")
+        st.session_state.CurrentTemperature = res_tem[0]
+
+        # Convert epoch time to datetime
+        epoch_time = res_tem[1]
+        indian_time_zone = pytz.timezone('Asia/Kolkata')
+        unforamted_current_temp_data_datetime = datetime.fromtimestamp(epoch_time, indian_time_zone)
+        current_temp_data_datetime=unforamted_current_temp_data_datetime.strftime('%Y-%m-%d %H:%M:%S %Z')
+
 
         interval=st.session_state.to_input_time - st.session_state.from_input_time
         agg_interval=10
@@ -159,8 +168,7 @@ def drawDashboard():
     with org_subheading[0]:
         st.subheader(body="Current Status:", anchor=False)
     with org_subheading[1]:
-        indian_time_zone = pytz.timezone('Asia/Kolkata')
-        st.write(f'[{datetime.now(indian_time_zone).strftime("%Y-%m-%d %H:%M:%S")}]')
+        st.write(current_temp_data_datetime)
     cols = st.columns(2, gap="medium", vertical_alignment="center")
     with cols[0]:
         with st.container(height=270, border=False):
@@ -283,10 +291,8 @@ def drawDashboard():
                 auto_update_time_range(True)
                 # st.rerun()
         
-        st.write(st.session_state.var_auto_update_time_range)
 
         if st.session_state.var_auto_update_time_range:
-            st.write("Time Range Updated!")
             update_time_range()
 
     # ------------------------chart container------------------------
@@ -532,8 +538,6 @@ def get_default_time_range():
     return[current_date_object, current_time_object, yesterday_date_object, from_time_object]
 
 def reset_time_range():
-    st.session_state.counter=st.session_state.counter+1
-    st.write(st.session_state.counter)
     
     default_time_range=get_default_time_range()
 
@@ -541,7 +545,7 @@ def reset_time_range():
     st.session_state.to_time = default_time_range[1]
     st.session_state.from_date = default_time_range[2]
     st.session_state.from_time = default_time_range[3]
-    st.write(st.session_state.to_date, st.session_state.to_time, st.session_state.from_date, st.session_state.from_time)
+    # st.write(st.session_state.to_date, st.session_state.to_time, st.session_state.from_date, st.session_state.from_time)
     # st.rerun()
 
 st.cache_data(ttl=10, show_spinner=False)
