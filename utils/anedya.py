@@ -89,7 +89,7 @@ def anedya_getValue(KEY):
 
     return value
 
-@st.cache_data(ttl=20, show_spinner=False)
+@st.cache_data(ttl=15, show_spinner=False)
 def anedya_get_latestData(param_variable_identifier: str)->int:
     url = "https://api.anedya.io/v1/data/latest"
     apiKey_in_formate = "Bearer " + apiKey
@@ -145,7 +145,7 @@ def anedya_getData(
     return [response_message, res_code]
 
 
-@st.cache_data(ttl=30, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def fetchHumidityData(param_from, param_to,param_aggregation_interval_in_minutes=10) -> pd.DataFrame:
     # currentTime = int(time.time())
     # pastHour_Time = int(currentTime - 86400)
@@ -193,7 +193,7 @@ def fetchHumidityData(param_from, param_to,param_aggregation_interval_in_minutes
         return value
 
 
-@st.cache_data(ttl=30, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def fetchTemperatureData(param_from=0, param_to=0,param_aggregation_interval_in_minutes=10) -> pd.DataFrame:
 
     # currentTime = int(time.time())    #to means recent time
