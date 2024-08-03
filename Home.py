@@ -164,7 +164,7 @@ def drawDashboard():
     st.markdown(
         "This dashboard provides live view of the Anedya's Office. Also allowing you to control the Light and Fan remotely!"
     )
-    org_subheading=st.columns([0.21, 0.3,1],vertical_alignment="bottom")
+    org_subheading=st.columns([0.4,1,1],vertical_alignment="bottom")
     with org_subheading[0]:
         st.subheader(body="Current Status:", anchor=False)
     with org_subheading[1]:
