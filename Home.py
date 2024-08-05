@@ -19,10 +19,11 @@ nodeId = "NODE_ID"  # get it from anedya dashboard -> project -> node
 apiKey = "API_KEY"  # aneyda project apikey
 
 
+
 st.set_page_config(page_title="Anedya IoT Dashboard", layout="wide")
 
-
-st_autorefresh(interval=20000, limit=None, key="auto-refresh-handler")
+refresh_interval = 30000
+st_autorefresh(interval=refresh_interval, limit=None, key="auto-refresh-handler")
 
 # --------------- HELPER FUNCTIONS -----------------------
 
@@ -34,13 +35,14 @@ def V_SPACE(lines):
 
 humidityData = pd.DataFrame()
 temperatureData = pd.DataFrame()
+current_temp_data_datetime = 0
 
 
 
 def main():
 
     anedya_config(nodeId, apiKey)
-    global humidityData, temperatureData
+    global humidityData, temperatureData,current_temp_data_datetime
 
     # Initialize the log in state if does not exist
     if "LoggedIn" not in st.session_state:
@@ -65,57 +67,19 @@ def main():
         st.session_state.CurrentTemperature = 0
     if "counter" not in st.session_state:
         st.session_state.counter = 0
-
+    default_time_range=[]
     if "from_date" not in st.session_state:
-        # Get the current date
-        current_date = datetime.now()
-        # Extract the year, month, and day
-        # Subtract one day to get yesterday's date
-        yesterday_date = current_date - timedelta(days=1)
-        # Extract the year, month, and day
-        yesterday_year = yesterday_date.year
-        yesterday_month = yesterday_date.month
-        yesterday_day = yesterday_date.day
-        # Create a date object for yesterday
-        yesterday_date_object = date(yesterday_year, yesterday_month, yesterday_day)
-        st.session_state.from_date = yesterday_date_object
+        default_time_range=get_default_time_range()
+        st.session_state.from_date = default_time_range[2]
 
     if "to_date" not in st.session_state:
-        # Get the current date
-        current_date = datetime.now()
-        # Extract the year, month, and day
-        current_year = current_date.year
-        current_month = current_date.month
-        current_day = current_date.day
-        # Create a date object
-        current_date_object = date(current_year, current_month, current_day)
-        st.session_state.to_date = current_date_object
+        st.session_state.to_date = default_time_range[0]
 
     if "from_time" not in st.session_state:
-        # Get the current date
-        current_date = datetime.now()
-        # Extract the year, month, and day
-        reset_date = current_date - timedelta(hours=3.8)
-        hour = reset_date.hour
-        minute = reset_date.minute
-        # Create a date object
-        current_time_object = time(hour, minute)       
-        st.session_state.from_time = current_time_object
+        st.session_state.from_time = default_time_range[3]
+
     if "to_time" not in st.session_state:
-
-        # Get the current date and time in the Indian time zone
-        indian_time_zone = pytz.timezone('Asia/Kolkata')
-        current_date = datetime.now(indian_time_zone)
-
-        # Extract the hour and minute
-        hour = current_date.hour
-        minute = current_date.minute
-
-        # Create a time object
-        current_time_object = time(hour, minute)
-
-        # Assuming `st` is your Streamlit session state
-        st.session_state.to_time = current_time_object
+        st.session_state.to_time = default_time_range[1]
 
     if "from_input_time" not in st.session_state:
         current_date = datetime.now()
@@ -126,14 +90,26 @@ def main():
         epoach_time=int(current_date.timestamp())
         st.session_state.to_input_time = epoach_time
 
+    if "var_auto_update_time_range" not in st.session_state:
+        st.session_state.var_auto_update_time_range = True
+
         
     if st.session_state.LoggedIn is False:
         drawLogin()
     else:
         # st.session_state.counter=st.session_state.counter+1
         # st.write(st.session_state.counter)
-        st.session_state.CurrentHumidity = anedya_get_latestData("humidity")
-        st.session_state.CurrentTemperature = anedya_get_latestData("temperature")
+        res_humidity = anedya_get_latestData("humidity")
+        st.session_state.CurrentHumidity = res_humidity[0]
+        res_tem=anedya_get_latestData("temperature")
+        st.session_state.CurrentTemperature = res_tem[0]
+
+        # Convert epoch time to datetime
+        epoch_time = res_tem[1]
+        indian_time_zone = pytz.timezone('Asia/Kolkata')
+        unforamted_current_temp_data_datetime = datetime.fromtimestamp(epoch_time, indian_time_zone)
+        current_temp_data_datetime=unforamted_current_temp_data_datetime.strftime('%Y-%m-%d %H:%M:%S %Z')
+
 
         interval=st.session_state.to_input_time - st.session_state.from_input_time
         agg_interval=10
@@ -188,8 +164,11 @@ def drawDashboard():
     st.markdown(
         "This dashboard provides live view of the Anedya's Office. Also allowing you to control the Light and Fan remotely!"
     )
-
-    st.subheader(body="Current Status", anchor=False)
+    org_subheading=st.columns([0.4,1,1],vertical_alignment="bottom")
+    with org_subheading[0]:
+        st.subheader(body="Current Status:", anchor=False)
+    with org_subheading[1]:
+        st.write(current_temp_data_datetime)
     cols = st.columns(2, gap="medium", vertical_alignment="center")
     with cols[0]:
         with st.container(height=270, border=False):
@@ -229,7 +208,7 @@ def drawDashboard():
     #     pass
 
     st.subheader(body="Controls", anchor=False)
-    buttons = st.columns([0.2,0.2,0.6], gap="small")
+    buttons = st.columns([0.4,0.4,1], gap="small")
     with buttons[0]:
         org_btn1=st.columns([0.4,0.6], gap="small",vertical_alignment="center")
         with org_btn1[0]:
@@ -244,9 +223,11 @@ def drawDashboard():
         with org_btn2[1]:
             st.button(label=st.session_state.LightButtonText, on_click=operateLight)
 
+#-----------------------------------------Time range filter-----------------------------------------
     with st.container():
         st.subheader(body="Time Range", anchor=False)
         datetime_cols = st.columns([1,1,0.2], gap="small", vertical_alignment="bottom")
+
         with datetime_cols[0]:
             from_cols=st.columns(2, gap="small")
             with from_cols[0]:
@@ -254,14 +235,13 @@ def drawDashboard():
                 from_start_datetime=st.date_input('From',key="from:date",value=st.session_state.from_date)
             with from_cols[1]:
                 from_time_input=st.time_input('time',key="from:time",value=st.session_state.from_time,label_visibility="hidden")
-            
+
             if from_start_datetime and from_time_input:
                 st.session_state.from_time = from_time_input
                 st.session_state.from_date = from_start_datetime
                 
                 combined_datetime = pd.to_datetime(f"{from_start_datetime} {from_time_input}")
                 # st.write("Combined datetime:", combined_datetime)
-
                 # Define the India time zone
                 india_tz = pytz.timezone('Asia/Kolkata')
 
@@ -298,11 +278,22 @@ def drawDashboard():
                 if to_time!=st.session_state.to_input_time:
                     st.session_state.to_input_time=to_time
                     st.rerun()
+        default_time_range=get_default_time_range()
+        # Check if the dates and times are within the tolerance range
+        if (from_start_datetime == default_time_range[2] and is_within_tolerance(from_time_input, default_time_range[3])) and(to_start_datetime == default_time_range[0] and is_within_tolerance(to_time_input, default_time_range[1])):
+            auto_update_time_range(True)
+        else:
+            auto_update_time_range(False)
 
         with datetime_cols[2]:
             reset_btn=st.button(label="Set Default", on_click=reset_time_range)
             if reset_btn:
-                st.rerun()
+                auto_update_time_range(True)
+                # st.rerun()
+        
+
+        if st.session_state.var_auto_update_time_range:
+            update_time_range()
 
     # ------------------------chart container------------------------
     with st.container():
@@ -478,7 +469,6 @@ def GetFanStatus() -> list:
             st.session_state.FanButtonText = "Turn Fan On!"
     return value
 
-
 @st.cache_data(ttl=4, show_spinner=False)
 def GetLightStatus() -> list:
     value = anedya_getValue("Light")
@@ -491,22 +481,41 @@ def GetLightStatus() -> list:
             st.session_state.LightState = False
             st.session_state.LightButtonText = "Turn Light On!"
     return value
+def auto_update_time_range(param_hold_or_start: bool = True):
+    # st.session_state.counter=st.session_state.counter+1
+    # st.write(st.session_state.counter)
+    if param_hold_or_start:
+        st.session_state.var_auto_update_time_range = True
+    else:
+        st.session_state.var_auto_update_time_range = False
 
-def reset_time_range():
+def is_within_tolerance(time1, time2, tolerance=timedelta(seconds=60)):
+    datetime1 = datetime.combine(date.min, time1)
+    datetime2 = datetime.combine(date.min, time2)
+    return abs((datetime1 - datetime2).total_seconds()) <= tolerance.total_seconds()
 
+
+def get_default_time_range():
+    
     # Get the current date and time in the Indian time zone
     indian_time_zone = pytz.timezone('Asia/Kolkata')
     current_date = datetime.now(indian_time_zone)
 
+    # Extract the year, month, and day
+    current_year = current_date.year
+    current_month = current_date.month
+    current_day = current_date.day
+    # Create a date object
+    current_date_object = date(current_year, current_month, current_day)
+    # st.session_state.to_date = current_date_object
+
     # Extract the hour and minute
     hour = current_date.hour
     minute = current_date.minute
-
     # Create a time object
     current_time_object = time(hour, minute)
-
     # Assuming `st` is your Streamlit session state
-    st.session_state.to_time = current_time_object
+    # st.session_state.to_time = current_time_object
 
     # Extract the year, month, and day
     reset_date = current_date - timedelta(hours=3.8)
@@ -514,16 +523,8 @@ def reset_time_range():
     minute = reset_date.minute
     # Create a date object
     from_time_object = time(hour, minute)       
-    st.session_state.from_time = from_time_object
+    # st.session_state.from_time = from_time_object
     
-    # Extract the year, month, and day
-    current_year = current_date.year
-    current_month = current_date.month
-    current_day = current_date.day
-    # Create a date object
-    current_date_object = date(current_year, current_month, current_day)
-    st.session_state.to_date = current_date_object
-
     # Subtract one day to get yesterday's date
     yesterday_date = current_date - timedelta(days=1)
     # Extract the year, month, and day
@@ -532,10 +533,26 @@ def reset_time_range():
     yesterday_day = yesterday_date.day
     # Create a date object for yesterday
     yesterday_date_object = date(yesterday_year, yesterday_month, yesterday_day)
-    st.session_state.from_date = yesterday_date_object
+    # st.session_state.from_date = yesterday_date_object
 
+    return[current_date_object, current_time_object, yesterday_date_object, from_time_object]
+
+def reset_time_range():
+    
+    default_time_range=get_default_time_range()
+
+    st.session_state.to_date = default_time_range[0]
+    st.session_state.to_time = default_time_range[1]
+    st.session_state.from_date = default_time_range[2]
+    st.session_state.from_time = default_time_range[3]
+    # st.write(st.session_state.to_date, st.session_state.to_time, st.session_state.from_date, st.session_state.from_time)
     # st.rerun()
 
+st.cache_data(ttl=10, show_spinner=False)
+def update_time_range():
+    st.session_state.var_auto_update_time_range = True
+    reset_time_range()
+    return 0
 
 if __name__ == "__main__":
     main()
