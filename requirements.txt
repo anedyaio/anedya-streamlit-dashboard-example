@@ -1,4 +1,4 @@
-anedya-dev-sdk-python
+anedya-dev-sdk
 streamlit
 pandas
 altair
