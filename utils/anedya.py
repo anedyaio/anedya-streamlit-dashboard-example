@@ -103,8 +103,8 @@ def anedya_get_latestData(param_variable_identifier: str)->list:
 
     response = requests.request("POST", url, headers=headers, data=payload)
     response_message = response.text
-    data = json.loads(response_message).get("data")[0].get("value")
-    timestamp = json.loads(response_message).get("data")[0].get("timestamp")
+    data = json.loads(response_message).get("data")[nodeId].get("value")
+    timestamp = json.loads(response_message).get("data")[nodeId].get("timestamp")
     # print(data, timestamp)
     return [data, timestamp]
 
