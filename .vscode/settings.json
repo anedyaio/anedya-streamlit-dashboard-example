@@ -1,5 +1,5 @@
 {
-    "python.analysis.typeCheckingMode": "strict",
+    "python.analysis.typeCheckingMode": "standard",
     "python.linting.pylintArgs": [
         "--extension-pkg-whitelist=streamlit",
         "--ignored-modules=streamlit"
