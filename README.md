@@ -28,7 +28,7 @@ Connect your Nodemcu with a DHT sensor and a relay module as per the [basic-home
 
 ### Running Locally
 1. Clone the Repository:
-Clone aneday-streamlit-dashboard-example repo from anedya github.
+Clone anedya-streamlit-dashboard-example repo from anedya github.
 ```
 git clone https://github.com/anedyaio/anedya-streamlit-dashboard-example.git
 cd anedya-streamlit-dashboard-example

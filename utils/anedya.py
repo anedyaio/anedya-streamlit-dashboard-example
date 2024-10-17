@@ -1,6 +1,7 @@
 import json
 import requests
 import time
+import uuid
 import streamlit as st
 import pandas as pd
 import pytz  # Add this import for time zone conversion
@@ -9,10 +10,28 @@ nodeId = ""
 apiKey = ""
 
 
-def anedya_config(NODE_ID, API_KEY):
+def anedya_config(NODE_ID, API_KEY) -> bool:
     global nodeId, apiKey
-    nodeId = NODE_ID
-    apiKey = API_KEY
+    if NODE_ID == "" and API_KEY == "":
+        st.error("Please config a valid NODE ID and API key.")
+        return False
+    elif API_KEY == "":
+        st.error("Please config a valid API key.")
+        return False
+    elif NODE_ID == "":
+        st.error("Please config a valid NODE ID.")
+        return False
+    try:
+        # Create a UUID object from the provided string
+        my_uuid = uuid.UUID(NODE_ID)
+        # Get the version of the UUID
+        version = my_uuid.version
+        nodeId = NODE_ID
+        apiKey = API_KEY
+        return True
+    except ValueError:
+        st.error("Please enter a valid NODE ID.")
+        return False
 
 
 def anedya_sendCommand(COMMAND_NAME, COMMAND_DATA):
@@ -250,9 +269,7 @@ def anedya_getDeviceStatus():
     url = "https://api.anedya.io/v1/health/status"
     apiKey_in_formate = "Bearer " + apiKey
 
-    payload = json.dumps(
-        {"nodes": [nodeId], "lastContactThreshold": 60}
-    )
+    payload = json.dumps({"nodes": [nodeId], "lastContactThreshold": 60})
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
