@@ -32,17 +32,17 @@ def V_SPACE(lines):
     for _ in range(lines):
         st.write("&nbsp;")
 
-
 humidityData = pd.DataFrame()
 temperatureData = pd.DataFrame()
 current_temp_data_datetime = 0
 
 
-
 def main():
-
-    anedya_config(nodeId, apiKey)
     global humidityData, temperatureData,current_temp_data_datetime
+
+    success = anedya_config(nodeId, apiKey)
+    if not success:
+        st.stop()
 
     # Initialize the log in state if does not exist
     if "LoggedIn" not in st.session_state:
