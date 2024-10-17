@@ -163,5 +163,5 @@ cython_debug/
 
 .vscode/
 components/
-dev-file.txt
+/dev_env/
 /__init__.py/

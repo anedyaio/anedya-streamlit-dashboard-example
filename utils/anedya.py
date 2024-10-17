@@ -1,6 +1,7 @@
 import json
 import requests
 import time
+import uuid
 import streamlit as st
 import pandas as pd
 import pytz  # Add this import for time zone conversion
@@ -14,16 +15,23 @@ def anedya_config(NODE_ID, API_KEY) -> bool:
     if NODE_ID == "" and API_KEY == "":
         st.error("Please config a valid NODE ID and API key.")
         return False
-    elif NODE_ID == "":
-        st.error("Please config a valid NODE ID.")
-        return False
     elif API_KEY == "":
         st.error("Please config a valid API key.")
         return False
-    
-    nodeId = NODE_ID
-    apiKey = API_KEY
-    return True
+    elif NODE_ID == "":
+        st.error("Please config a valid NODE ID.")
+        return False
+    try:
+        # Create a UUID object from the provided string
+        my_uuid = uuid.UUID(NODE_ID)
+        # Get the version of the UUID
+        version = my_uuid.version
+        nodeId = NODE_ID
+        apiKey = API_KEY
+        return True
+    except ValueError:
+        st.error("Please enter a valid NODE ID.")
+        return False
 
 
 def anedya_sendCommand(COMMAND_NAME, COMMAND_DATA):
