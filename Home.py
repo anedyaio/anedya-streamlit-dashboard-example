@@ -116,8 +116,14 @@ def main():
                 st.session_state.device_status = "Offline"                
 
         res_humidity = anedya_get_latestData("humidity")
+        if res_humidity[0] is None:
+            st.error("No Humidity data found")
+            st.stop()
         st.session_state.CurrentHumidity = res_humidity[0]
         res_tem=anedya_get_latestData("temperature")
+        if res_tem is None:
+            st.error("No Temperature data found")
+            st.stop()
         st.session_state.CurrentTemperature = res_tem[0]
 
         # Convert epoch time to datetime

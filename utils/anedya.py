@@ -123,10 +123,20 @@ def anedya_get_latestData(param_variable_identifier: str) -> list:
 
     response = requests.request("POST", url, headers=headers, data=payload)
     response_message = response.text
-    data = json.loads(response_message).get("data")[nodeId].get("value")
-    timestamp = json.loads(response_message).get("data")[nodeId].get("timestamp")
-    # print(data, timestamp)
-    return [data, timestamp]
+    # print(response_message)
+    response_message_json=json.loads(response_message)
+    data = response_message_json.get("data")
+    if response_message_json.get("success"):
+        if data !={}:
+            data = response_message_json.get("data")[nodeId].get("value")
+            timestamp = response_message_json.get("data")[nodeId].get("timestamp")
+            # print(data, timestamp)
+            return [data, timestamp]
+        else:
+            return [None, None]
+    else:
+        st.error(f"Response for {param_variable_identifier}: {response_message_json.get("error")}")
+        st.stop()
 
 
 def anedya_getData(
