@@ -1,8 +1,8 @@
 anedya-dev-sdk
 streamlit
-pandas
 altair
 pytz
 requests
 streamlit-autorefresh
 streamviz
+pandas
